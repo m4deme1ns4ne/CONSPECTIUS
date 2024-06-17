@@ -1,6 +1,9 @@
-from aiogram.types import ReplyKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 main = ReplyKeyboardMarkup(
-    keyboard=[],
-    input_field_placeholder="Просто загрузи аудиозапись лекции и я создам конспект.."
+    keyboard=[[
+        KeyboardButton(text='Подписка')
+    ]],
+    input_field_placeholder="Просто загрузи аудиозапись лекции и я создам конспект..",
+    resize_keyboard=True
 )

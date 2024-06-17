@@ -1,6 +1,12 @@
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
 db_config = {
     'host': 'localhost',
     'database': 'telegram_bot',
     'user': 'root',
-    'password': '12d183b8f13 fybdisfhYAfYFYFYFYFEYEFYFEYFEYGYEF@@@@@U@UFU@H@H@UHFU@HU@F'
+    'password': os.getenv("MYSQLPASSWORD")
 }

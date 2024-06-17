@@ -5,7 +5,7 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-from cmd_message import start_message
+from cmd_message import start_message, subscription
 import keyboards as kb
 from main_processing import main_processing
 from conversion_txt_to_docx import txt_to_docx
@@ -82,8 +82,14 @@ async def handle_voice_message(message: Message):
 async def process_payment(message: Message):
     telegram_id = message.from_user.id
     payment_date = datetime.now()
-    subscription_end_date = payment_date + timedelta(days=30)  # Например, подписка на 30 дней
+    subscription_end_date = payment_date + timedelta(days=30)
 
     insert_payment_data(telegram_id, payment_date, subscription_end_date, subscription_status=True)
 
     await message.answer("Оплата успешно проведена!")
+
+
+@logger.catch
+@router.message(F.text == "Подписка")
+async def subscription_message(message: Message):
+    await message.answer(subscription)
