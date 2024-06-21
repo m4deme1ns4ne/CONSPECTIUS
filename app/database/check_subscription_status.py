@@ -4,6 +4,7 @@ from logger import logger
 from database.config import db_config
 from datetime import datetime
 
+
 @logger.catch
 def check_subscription_status(telegram_id):
     try:
