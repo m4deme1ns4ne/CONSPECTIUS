@@ -1,4 +1,6 @@
 from aiogram import Bot, Dispatcher
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.client.telegram import TelegramAPIServer 
 import asyncio
 from loguru import logger
 import os
@@ -12,7 +14,8 @@ from logger import file_logger
 async def main():
     load_dotenv()
     file_logger()
-    bot = Bot(token=os.getenv("BOT_TOKEN"))
+    session = AiohttpSession(api=TelegramAPIServer.from_base("http://localhost:8081", is_local=True))
+    bot = Bot(token=os.getenv("BOT_TOKEN"), session=session)
     dp = Dispatcher()
     dp.include_router(router)
     await dp.start_polling(bot)

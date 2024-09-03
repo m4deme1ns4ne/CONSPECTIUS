@@ -26,7 +26,7 @@ async def cmd_start(message: Message):
 
 
 # Обработчик аудиосообщений
-@router.message(F.voice)
+@router.message(F.audio)
 async def handle_voice_message(message: Message):
     telegram_id = message.from_user.id
 
@@ -35,18 +35,20 @@ async def handle_voice_message(message: Message):
         await message.answer("Ваша подписка не активирована. Пожалуйста, активируйте подписку для использования этой функции.")
         return
 
-    await message.answer("""
-🎧 Ваше аудиосообщение принято и обрабатывается. ⏳ Пожалуйста, подождите 5-15 минут. Спасибо за ваше терпение!
-                         """)
-    voice = message.voice
-    file_id = voice.file_id
+    audio = message.audio
+    file_id = audio.file_id
     # Получаем объект File по file_id
     file = await message.bot.get_file(file_id)
     # Скачиваем файл
     file_path = file.file_path
-    download_path = "/home/alexandervolzhanin/pet-project/CONSPECTIUS/app/audio/audio_message.ogg"
+    download_path = "/home/alexandervolzhanin/pet-project/CONSPECTIUS/app/audio/audio_message.mp3"
 
     await message.bot.download_file(file_path, download_path)
+
+    await message.answer("""
+🎧 Ваше аудиосообщение принято и обрабатывается. ⏳ Пожалуйста, подождите 5-15 минут. Спасибо за ваше терпение!
+                         """)
+
     logger.info(f"Аудиосообщение сохранено")
     conspect = main_processing()
     logger.info(f"Конспект получен")
