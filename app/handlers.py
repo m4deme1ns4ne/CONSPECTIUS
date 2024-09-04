@@ -35,10 +35,9 @@ async def handle_voice_message(message: Message):
         await message.answer("Ваша подписка не активирована. Пожалуйста, активируйте подписку для использования этой функции.")
         return
 
-    audio = message.audio
-    file_id = audio.file_id
+    voice = message.audio.file_id
     # Получаем объект File по file_id
-    file = await message.bot.get_file(file_id)
+    file = await message.bot.get_file(voice)
     # Скачиваем файл
     file_path = file.file_path
     download_path = "/home/alexandervolzhanin/pet-project/CONSPECTIUS/app/audio/audio_message.mp3"

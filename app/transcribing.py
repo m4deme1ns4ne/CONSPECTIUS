@@ -20,7 +20,7 @@ def transcribing_aai() -> str:
 
     transcriber = aai.Transcriber()
     audio_url = (
-        "/home/alexandervolzhanin/pet-project/CONSPECTIUS/app/audio/audio_message.ogg"
+        "/home/alexandervolzhanin/pet-project/CONSPECTIUS/app/audio/audio_message.mp3"
     )
     config = aai.TranscriptionConfig(language_code="ru")
 
