@@ -3,7 +3,6 @@ import time
 from loguru import logger
 import os
 from dotenv import load_dotenv
-import sys
 
 
 @logger.catch
@@ -16,7 +15,7 @@ def transcribing_aai() -> str:
         logger.info("Обработка ASSEMBLY_AI_API прошла успешно")
     except Exception as err:
         logger.error(f"Ошибка при обработке ASSEMBLY_AI_API: {err}")
-        sys.exit()
+        # sys.exit()
 
     transcriber = aai.Transcriber()
     audio_url = (
@@ -37,4 +36,3 @@ def transcribing_aai() -> str:
         
     except Exception as err:
         logger.error(f"Ошибка при транскрибации: {err}")
-        sys.exit()

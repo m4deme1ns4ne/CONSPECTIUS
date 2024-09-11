@@ -4,7 +4,6 @@ from transcribing import transcribing_aai
 
 
 from loguru import logger
-import sys
 
 
 @logger.catch
@@ -18,4 +17,3 @@ def main_processing() -> str:
     
     except Exception as err:
         logger.error(f'Ошибка при получении ответа: {err}')
-        sys.exit()

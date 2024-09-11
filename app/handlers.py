@@ -2,7 +2,6 @@ from aiogram.types import Message, FSInputFile
 from aiogram.filters import CommandStart
 from aiogram import F, Router
 import os
-import sys
 from datetime import datetime, timedelta
 
 from cmd_message import start_message, subscription
@@ -59,7 +58,6 @@ async def handle_voice_message(message: Message):
     except Exception as err:
         await message.answer(error)
         logger.error(f"Ошибка при конвертировании конспекта: {err}")
-        sys.exit()
 
     try:
         # Путь к вашему файлу
@@ -76,7 +74,6 @@ async def handle_voice_message(message: Message):
     except Exception as err:
         await message.answer(error)
         logger.error(f"Ошибка при пересылке файла: {err}")
-        sys.exit()
 
 
 @router.message(F.text == "/pay")

@@ -5,7 +5,6 @@ import asyncio
 from loguru import logger
 import os
 from dotenv import load_dotenv
-import sys
 
 from handlers import router
 from logger import file_logger
@@ -29,4 +28,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.error("Бот выключен")
-        sys.exit()
