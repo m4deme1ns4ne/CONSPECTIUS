@@ -1,85 +1,84 @@
-from openai import OpenAI
-import tiktoken
-from dotenv import load_dotenv
+import asyncio
 from loguru import logger
+from openai import AsyncOpenAI
 import httpx
-from logger import file_logger
 import os
 
-from promt_for_gpt import role_system, role_user_0, role_user_1
+from app.promt_for_gpt import role_system, role_user_0, role_user_1
+from .etc.split_text import split_text
+from .etc.count_tokens import count_tokens
 
+class GPTResponse:
+    def __init__(self) -> None:
+        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.proxies = os.getenv("PROXY")
+        self.local_address = "0.0.0.0"
 
-def handler_gpt(text: str, promt: str) -> str: 
+    async def get_openai_client(self):
+        """
+        Создание клиента OpenAI.
+        """
+        return AsyncOpenAI(
+            api_key=self.api_key,
+            http_client=httpx.AsyncClient(
+                proxies=self.proxies,
+                transport=httpx.HTTPTransport(local_address=self.proxies)
+            )
+        )
 
-    load_dotenv()
+    @logger.catch
+    async def gpt_answer(self,
+                        text: str,
+                        model_gpt: str,
+                        promt: str) -> str:
+        """
+        Отправляет вопрос модели GPT и обрабатывает ответ.
 
-    try:
-        client = OpenAI(api_key=os.getenv("API_OPEN_AI"),
-                        http_client=httpx.Client(
-                            proxies=os.getenv("PROXY"),
-                            transport=httpx.HTTPTransport(local_address="0.0.0.0")
-                        ))
-        logger.info("API_OPEN_AI обработан")
+        :param question (str): Строка с вопросом или запросом пользователя.
+        :param model_gpt (str): Строка, обозначающая используемую модель GPT.
+        :param telegram_id (int): Целочисленный идентификатор пользователя в Telegram.
 
-    except Exception as err:
-        logger.info(f"Ошибка при получении API_OPEN_AI: {err}")
-    
-    try:
-        completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": role_system},
-            {"role": "user", "content": f"{promt} {text}"}
-                 ])
-        
-        logger.info("Обработка файла завершена")
-        res = completion.choices[0].message.content
-        return res
+        :return: Ответ от модели GPT в виде строки.
+        """
+        try:
+            # Создаем клиент OpenAI
+            client = await self.get_openai_client()
 
-    except Exception as err:
-        logger.info(f"Ошибка при обработке запроса: {err}")
+            # Отправляем запрос в GPT
+            response = await client.chat.completions.create(
+                model=model_gpt,
+                messages=[
+                    {"role": "system", "content": str(role_system)},
+                    {"role": "user", "content": f"{promt}:{text}"}
+                ]
+            )
+            return response.choices[0].message.content
 
+        except Exception as err:
+            logger.error(f"Ошибка при обработке запроса: {err}")
+            raise Exception("Произошла ошибка при обработке запроса.")
 
-def split_text(text, max_tokens=16384):
-    enc = tiktoken.get_encoding("cl100k_base")  # или другой подходящий для вашей модели
-    tokens = enc.encode(text)
-    
-    # Разбиваем токены на части, каждая из которых не превышает max_tokens
-    chunks = [tokens[i:i + max_tokens] for i in range(0, len(tokens), max_tokens)]
-    
-    # Декодируем обратно в текст
-    return [enc.decode(chunk) for chunk in chunks]
+    @logger.catch
+    async def processing_transcribing(self, text: str) -> str:
+        split_texts = split_text(text)
+        ansver = ""
+        model_gpt = "gpt-4o-mini"
 
+        for i, chunk in enumerate(split_texts):
+            if i == 0:
+                res = await self.gpt_answer(text=chunk,
+                                            model_gpt=model_gpt,
+                                            promt=role_user_0)
+            else:
+                res = await self.gpt_answer(text=chunk,
+                                            model_gpt=model_gpt,
+                                            promt=role_user_1)
+            ansver += f"{res}\n"
 
-def count_tokens(prompt, model="gpt-4"):
-    # Инициализация кодировщика для нужной модели
-    encoding = tiktoken.encoding_for_model(model)
-    
-    # Кодирование текста в токены
-    tokens = encoding.encode(prompt)
-    
-    # Возвращаем количество токенов
-    return len(tokens)
+        model_name = "gpt-4o-mini"  # Укажите модель, которую вы используете
+        token_count = count_tokens(text, model=model_name)
 
+        logger.info(f"Конспект получен")
+        logger.info(f"Количество токенов для запроса: {token_count}")
 
-@logger.catch
-def handling(text: str) -> str:
-
-    file_logger()
-    
-    split_texts = split_text(text)
-    ansver = ""
-
-    for i, chunk in enumerate(split_texts):
-        if i == 0:
-            res = handler_gpt(chunk, role_user_0)
-        else:
-            res = handler_gpt(chunk, role_user_1)
-        ansver += f"{res + '\n'}"
-
-    model_name = "gpt-4o-mini"  # Укажите модель, которую вы используете
-    token_count = count_tokens(text, model=model_name)
-    
-    logger.info(f"Количество токенов для запроса: {token_count}")
-
-    return ansver
+        return ansver

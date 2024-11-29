@@ -1,9 +1,12 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
+                           InlineKeyboardMarkup, InlineKeyboardButton)
 
-main = ReplyKeyboardMarkup(
-    keyboard=[[
-        KeyboardButton(text='Подписка')
-    ]],
-    input_field_placeholder="Просто загрузи аудиозапись лекции и я создам конспект..",
+main = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text='Сделать конспект')]
+    ],
     resize_keyboard=True
 )
+
+confirmation = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Текст скинут", callback_data="confirmation")]
+])

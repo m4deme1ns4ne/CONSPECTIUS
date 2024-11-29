@@ -2,24 +2,11 @@ import assemblyai as aai
 import time
 from loguru import logger
 import os
-from dotenv import load_dotenv
+
+from .etc.convert_seconds import convert_seconds
 
 
-def convert_seconds(seconds):
-    if seconds >= 60:
-        minutes = seconds // 60
-        remaining_seconds = seconds % 60
-        return f"{minutes} минут {round(remaining_seconds)} секунд"
-    else:
-        return f"{round(seconds)} секунд"
-
-@logger.catch
-def transcribing_aai() -> str:
-    
-    from handlers import telegram_id
-    load_dotenv()
-
-    download_path = f"/home/alexandervolzhanin/pet-project/CONSPECTIUS/app/audio/{telegram_id}.mp3"
+def transcribing_aai(file_path: str) -> str:
 
     try:
         aai.settings.api_key = os.getenv("ASSEMBLY_AI_API")
@@ -29,7 +16,7 @@ def transcribing_aai() -> str:
         logger.error(f"Ошибка при обработке ASSEMBLY_AI_API: {err}")
 
     transcriber = aai.Transcriber()
-    audio_url = (download_path)
+    audio_url = (file_path)
     config = aai.TranscriptionConfig(language_code="ru")
 
     try:
@@ -43,12 +30,6 @@ def transcribing_aai() -> str:
 
         logger.info("Конец транскрибации")
         logger.info(f"Время выполения транскрибации: {convert_seconds(completion_time)}")
-
-        try:
-            os.remove(download_path)
-            logger.info(f"Аудиофайл {telegram_id} удалён")
-        except Exception as err:
-            logger.error(f"Ошибка при удалении аудио: {err}")
 
         return transcript.text
         
