@@ -3,7 +3,7 @@ import time
 from loguru import logger
 import os
 
-from .etc.convert_seconds import convert_seconds
+from ..utils.convert_seconds import convert_seconds
 
 
 def transcribing_aai(file_path: str) -> str:

@@ -1,12 +1,11 @@
-import asyncio
 from loguru import logger
 from openai import AsyncOpenAI
 import httpx
 import os
 
-from app.promt_for_gpt import role_system, role_user_0, role_user_1
-from .etc.split_text import split_text
-from .etc.count_tokens import count_tokens
+from .promt_for_gpt import role_system
+from ..utils.split_text import split_text
+from ..utils.count_tokens import count_tokens
 
 class GPTResponse:
     def __init__(self) -> None:
@@ -29,8 +28,7 @@ class GPTResponse:
     @logger.catch
     async def gpt_answer(self,
                         text: str,
-                        model_gpt: str,
-                        promt: str) -> str:
+                        model_gpt: str) -> str:
         """
         Отправляет вопрос модели GPT и обрабатывает ответ.
 
@@ -49,7 +47,7 @@ class GPTResponse:
                 model=model_gpt,
                 messages=[
                     {"role": "system", "content": str(role_system)},
-                    {"role": "user", "content": f"{promt}:{text}"}
+                    {"role": "user", "content": f"{text}"}
                 ]
             )
             return response.choices[0].message.content
@@ -61,18 +59,12 @@ class GPTResponse:
     @logger.catch
     async def processing_transcribing(self, text: str) -> str:
         split_texts = split_text(text)
-        ansver = ""
         model_gpt = "gpt-4o-mini"
 
-        for i, chunk in enumerate(split_texts):
-            if i == 0:
-                res = await self.gpt_answer(text=chunk,
-                                            model_gpt=model_gpt,
-                                            promt=role_user_0)
-            else:
-                res = await self.gpt_answer(text=chunk,
-                                            model_gpt=model_gpt,
-                                            promt=role_user_1)
+        ansver = ""
+        for chunk in split_texts:
+            res = await self.gpt_answer(text=chunk,
+                                model_gpt=model_gpt)
             ansver += f"{res}\n"
 
         model_name = "gpt-4o-mini"  # Укажите модель, которую вы используете

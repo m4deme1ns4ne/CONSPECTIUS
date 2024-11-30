@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from loguru import logger
 import os
 
-from app.logger import file_logger
+from app.core.logger import file_logger
 from app.handlers import (start, handle_voice_message)
 
 
