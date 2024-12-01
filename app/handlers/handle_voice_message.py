@@ -22,12 +22,13 @@ DOCX_OUTPUT_PATH = "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/receive
 @router.message(F.text == "Сделать конспект")
 async def handle_summarize_request(message: Message):
     """Обрабатывает команду пользователя для создания конспекта."""
-    sent_message = await message.answer(
-        "Скиньте конспект по [ссылке](https://8f3a-5-18-188-83.ngrok-free.app/)",
+    await message.answer(
+        "Скиньте конспект по [ссылке](https://89af-5-18-188-83.ngrok-free.app)",
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True,
         reply_markup=kb.confirmation,
     )
+
 
 @router.callback_query(F.data == "confirmation")
 async def process_confirmation(callback: CallbackQuery, bot: Bot):
@@ -39,7 +40,6 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot):
     try:
         audio_path = check_any_file_exists(AUDIO_UPLOAD_PATH)
         logger.info("Аудио найдено")
-        await edit_message_stage(bot, msg_edit=waiting_message, stage=25)
     except Exception as err:
         logger.error(f"Файл не найден: {err}")
         await send_error_message(bot, msg_edit=waiting_message)
@@ -47,9 +47,9 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot):
 
     # Распознавание аудио
     try:
+        await edit_message_stage(bot, msg_edit=waiting_message, stage=" Перевод аудиосообщения в текст 🎤")
         transcription = transcribing_aai(audio_path)
         logger.info("Аудио успешно расшифровано.")
-        await edit_message_stage(bot, msg_edit=waiting_message, stage=50)
     except Exception as err:
         logger.error(f"Ошибка при расшифровке аудио: {err}")
         await send_error_message(bot, waiting_message)
@@ -57,10 +57,10 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot):
 
     # Обработка расшифровки через GPT
     try:
+        await edit_message_stage(bot, msg_edit=waiting_message, stage="Обработка текста нейросетью 🤖")
         ai = GPTResponse()
         conspect = await ai.processing_transcribing(transcription)
         logger.info("Конспект успешно обработан GPT.")
-        await edit_message_stage(bot, msg_edit=waiting_message, stage=75)
     except Exception as err:
         logger.error(f"Ошибка при обработке конспекта: {err}")
         await send_error_message(bot, waiting_message)
@@ -70,7 +70,6 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot):
     try:
         txt_to_docx(text=conspect)
         logger.info("Файл успешно конвертирован в .docx.")
-        await edit_message_stage(bot, msg_edit=waiting_message, stage=100)
     except Exception as err:
         logger.error(f"Ошибка при конвертации файла: {err}")
         await send_error_message(bot, waiting_message)
@@ -79,12 +78,12 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot):
     # Отправка файла пользователю
     try:
         input_file = FSInputFile(DOCX_OUTPUT_PATH)
-        await waiting_message.delete()
-        await callback.message.answer_document(input_file, caption="Ваш конспект")
+        await edit_message_stage(bot, msg_edit=waiting_message, text="Ваш конспект ☺️")
+        await callback.message.answer_document(input_file)
         logger.info("Файл успешно отправлен пользователю.")
     except Exception as err:
         logger.error(f"Ошибка при отправке файла: {err}")
-        await send_error_message(callback, bot, waiting_message)
+        await send_error_message(bot, waiting_message)
         return
 
     # Удаление временного файла
