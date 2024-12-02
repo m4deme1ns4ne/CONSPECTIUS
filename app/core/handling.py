@@ -3,9 +3,10 @@ from openai import AsyncOpenAI
 import httpx
 import os
 
-from .promt_for_gpt import beginning_text, middle_of_the_text, end_of_text, role_system
+from .promt_for_gpt import beginning_text, middle_of_the_text, end_of_text
 from ..utils.split_text import TextSplitter
 from ..utils.count_tokens import count_tokens
+
 
 class GPTResponse:
     def __init__(self) -> None:
@@ -47,8 +48,8 @@ class GPTResponse:
             response = await client.chat.completions.create(
                 model=model_gpt,
                 messages=[
-                    {"role": "system", "content": str(role_system)},
-                    {"role": "user", "content": f"{promt}:{text}"}
+                    {"role": "system", "content": str(promt)},
+                    {"role": "user", "content": text}
                 ]
             )
             return response.choices[0].message.content
