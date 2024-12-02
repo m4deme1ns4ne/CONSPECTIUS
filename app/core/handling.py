@@ -3,8 +3,8 @@ from openai import AsyncOpenAI
 import httpx
 import os
 
-from .promt_for_gpt import role_system
-from ..utils.split_text import split_text
+from .promt_for_gpt import beginning_text, middle_of_the_text, end_of_text, role_system
+from ..utils.split_text import TextSplitter
 from ..utils.count_tokens import count_tokens
 
 class GPTResponse:
@@ -28,7 +28,8 @@ class GPTResponse:
     @logger.catch
     async def gpt_answer(self,
                         text: str,
-                        model_gpt: str) -> str:
+                        model_gpt: str,
+                        promt: str) -> str:
         """
         Отправляет вопрос модели GPT и обрабатывает ответ.
 
@@ -47,7 +48,7 @@ class GPTResponse:
                 model=model_gpt,
                 messages=[
                     {"role": "system", "content": str(role_system)},
-                    {"role": "user", "content": f"{text}"}
+                    {"role": "user", "content": f"{promt}:{text}"}
                 ]
             )
             return response.choices[0].message.content
@@ -58,14 +59,31 @@ class GPTResponse:
 
     @logger.catch
     async def processing_transcribing(self, text: str) -> str:
-        split_texts = split_text(text)
+        splitter = TextSplitter(text)
+        parts = splitter.split()
         model_gpt = "gpt-4o-mini"
 
         ansver = ""
-        for chunk in split_texts:
-            res = await self.gpt_answer(text=chunk,
-                                model_gpt=model_gpt)
-            ansver += f"{res}\n"
+        for i, chunk in enumerate(parts):
+            if i == 0:
+                res = await self.gpt_answer(
+                                    text=chunk,
+                                    model_gpt=model_gpt,
+                                    promt=beginning_text)
+                ansver += f"{res}\n"
+            elif i == 1:
+                res = await self.gpt_answer(
+                                    text=chunk,
+                                    model_gpt=model_gpt,
+                                    promt=middle_of_the_text)
+                ansver += f"{res}\n"
+            else:
+                res = await self.gpt_answer(
+                                    text=chunk,
+                                    model_gpt=model_gpt,
+                                    promt=end_of_text)
+                ansver += f"{res}\n"
+        
 
         model_name = "gpt-4o-mini"  # Укажите модель, которую вы используете
         token_count = count_tokens(text, model=model_name)
