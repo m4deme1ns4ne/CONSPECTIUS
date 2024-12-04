@@ -1,5 +1,6 @@
 from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
-                           InlineKeyboardMarkup, InlineKeyboardButton)
+                           InlineKeyboardMarkup, InlineKeyboardButton,
+                           WebAppInfo)
 
 main = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Сделать конспект')]
@@ -8,7 +9,8 @@ main = ReplyKeyboardMarkup(keyboard=[
 )
 
 confirmation = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Текст скинут", callback_data="confirmation")]
+    [InlineKeyboardButton(text="Ссылка для отпраки аудио", web_app=WebAppInfo(url="https://fc38-5-18-188-83.ngrok-free.app"))],
+    [InlineKeyboardButton(text="Аудио скинуто ✔️", callback_data="confirmation")]
 ])
 
 report_an_error = InlineKeyboardMarkup(

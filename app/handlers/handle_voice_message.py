@@ -25,7 +25,7 @@ DOCX_OUTPUT_PATH = "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/receive
 async def handle_summarize_request(message: Message):
     """Обрабатывает команду пользователя для создания конспекта."""
     await message.answer(
-        "Скиньте конспект по [ссылке](...)",
+        "1. Пришлите аудио по первой кнопке 🎧\n2. После этого нажмите на кнопку 'Аудио скинуто ✔️'",
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True,
         reply_markup=kb.confirmation,
@@ -35,7 +35,7 @@ async def handle_summarize_request(message: Message):
 async def process_confirmation(callback: CallbackQuery, bot: Bot):
     """Обрабатывает подтверждение и выполняет создание конспекта."""
 
-    waiting_message = await callback.message.answer(cmd.audio_message_accepted)
+    waiting_message = await callback.message.edit_text(cmd.audio_message_accepted)
 
     # Проверка наличия аудиофайла
     try:
@@ -49,11 +49,11 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot):
     # Распознавание аудио
     try:
         await edit_message_stage(bot, msg_edit=waiting_message, stage=" Перевод аудиосообщения в текст 🎤")
-        # transcription = transcribing_aai(audio_path)
-#_______________________________________________________________
-        with open('/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/tests/test_trans.txt', 'r', encoding='utf-8') as file:
-            transcription = file.read()
-#_______________________________________________________________
+        transcription = transcribing_aai(audio_path)
+# #_______________________________________________________________
+#         with open('/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/tests/test_trans.txt', 'r', encoding='utf-8') as file:
+#             transcription = file.read()
+# #_______________________________________________________________
         logger.info("Аудио успешно расшифровано.")
     except Exception as err:
         logger.error(f"Ошибка при расшифровке аудио: {err}")
