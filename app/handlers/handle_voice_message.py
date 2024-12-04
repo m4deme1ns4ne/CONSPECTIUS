@@ -77,6 +77,7 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
         audio_path = check_any_file_exists(AUDIO_UPLOAD_PATH)
         logger.info("Аудио найдено")
     except Exception as err:
+        await state.clear()
         logger.error(f"Файл не найден: {err}")
         await send_error_message(bot, msg_edit=waiting_message,
                                  error="Файл не найден❗️")
@@ -85,15 +86,13 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
     # Распознавание аудио
     try:
         language = callback.data
-        await edit_message_stage(bot, msg_edit=waiting_message, stage=" Перевод аудиосообщения в текст 🎤")
-        transcription = transcribing_aai(file_path=audio_path,
-                                         language=language)
-# #_______________________________________________________________
-#         with open('/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/tests/test_trans.txt', 'r', encoding='utf-8') as file:
-#             transcription = file.read()
-# #_______________________________________________________________
+        await edit_message_stage(bot, msg_edit=waiting_message, stage="Перевод аудиосообщения в текст 🎤")
+        transcription = await transcribing_aai(file_path=audio_path, language=language)
+        if not transcription:
+            raise Exception("Транскрипция не выполнена.")
         logger.info("Аудио успешно расшифровано.")
     except Exception as err:
+        await state.clear()
         logger.error(f"Ошибка при расшифровке аудио: {err}")
         await send_error_message(bot, waiting_message,
                                  error="Произошла ошибка при расшифровке аудиофайла❗️")
@@ -104,8 +103,11 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
         await edit_message_stage(bot, msg_edit=waiting_message, stage="Обработка текста нейросетью 🤖")
         ai = GPTResponse()
         conspect = await ai.processing_transcribing(transcription)
+        if not conspect:
+            raise Exception()
         logger.info("Конспект успешно обработан GPT.")
     except Exception as err:
+        await state.clear()
         logger.error(f"Ошибка при обработке конспекта: {err}")
         await send_error_message(bot, waiting_message,
                                  error="Произошла ошибка при обработке конспекта❗️")
@@ -116,6 +118,7 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
         txt_to_docx(text=conspect)
         logger.info("Файл успешно конвертирован в .docx.")
     except Exception as err:
+        await state.clear()
         logger.error(f"Ошибка при конвертации файла: {err}")
         await send_error_message(bot, waiting_message,
                                  error="Произошла ошибка при конвертации файла в формат .docx ❗️")
@@ -129,6 +132,7 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
         await state.clear()
         logger.info("Файл успешно отправлен пользователю.")
     except Exception as err:
+        await state.clear()
         logger.error(f"Ошибка при отправке файла: {err}")
         await send_error_message(bot, waiting_message,
                                  error="Произошла ошибка при отправке файла вам❗️")

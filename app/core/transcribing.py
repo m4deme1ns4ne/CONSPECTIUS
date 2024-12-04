@@ -2,17 +2,19 @@ import assemblyai as aai
 import time
 from loguru import logger
 import os
+import asyncio
 
 from ..utils.convert_seconds import convert_seconds
+from ..utils.upload_file import upload_file
 
 
-def transcribing_aai(file_path: str, language: str) -> str:
+async def transcribing_aai(file_path: str, language: str) -> str:
     """
-    Эта функция принимает в качестве аргумента путь к аудиофайлу и
-    транскрибирует его, используя API AssemblyAI.
+    Эта функция принимает путь к аудиофайлу и транскрибирует его с использованием API AssemblyAI.
 
     Args:
-        file_path (str): Путь к транскрибируемому аудиофайлу.
+        file_path (str): Путь к аудиофайлу для транскрибации.
+        language (str): Код языка для транскрибации или "cancel" для автоматического определения языка.
 
     Returns:
         str: Транскрибированный текст.
@@ -20,37 +22,48 @@ def transcribing_aai(file_path: str, language: str) -> str:
     # Обработка ключа API AssemblyAI
     try:
         aai.settings.api_key = os.getenv("ASSEMBLY_AI_API")
-        logger.info("Обработка ASSEMBLY_AI_API прошла успешно")
-
+        logger.info("Ключ API AssemblyAI обработан успешно.")
     except Exception as err:
         logger.error(f"Ошибка при обработке ASSEMBLY_AI_API: {err}") 
+        return ""
 
-    # Создание экземпляра класса Transcriber и определение конфигурации транскрибации
+    # Инициализация Transcriber и настройка конфигурации транскрибации
     transcriber = aai.Transcriber()
-    audio_url = (file_path)
 
-    config = aai.TranscriptionConfig(punctuate=False, 
-                                     format_text=False,
-                                     language_code=language if language != "cancel" else None,
-                                     language_detection=True if language == "cancel" else False)
+    config = aai.TranscriptionConfig(
+        punctuate=False, 
+        format_text=False,
+        language_code=language if language != "cancel" else None,
+        language_detection=True if language == "cancel" else False
+    )
 
-    # Запуск транскрибации
+    # Начало транскрибации
     try:
-        logger.info("Начало транскрибации")
+        logger.info("Загрузка файла для транскрибации.")
+        audio_url = await upload_file(file_path)
+        logger.info("Файл успешно загружен. Начало транскрибации.")
 
         start_time = time.perf_counter()
-        transcript = transcriber.transcribe(audio_url, config)
+        
+        # Инициация транскрипции и получение Future
+        job_future = transcriber.transcribe_async(audio_url, config)
+        
+        # Оборачивание concurrent.futures.Future в asyncio.Future
+        job = await asyncio.wrap_future(job_future)
+
         end_time = time.perf_counter()
 
         completion_time = end_time - start_time
 
-        logger.info("Конец транскрибации")
-        logger.info(f"Время выполения транскрибации: {convert_seconds(completion_time)}")
+        if job.status == 'completed':
+            transcription_text = job.text
+            logger.info("Транскрибация завершена успешно.")
+            logger.info(f"Время выполнения транскрибации: {convert_seconds(completion_time)}")
+            return transcription_text
+        else:
+            logger.error(f"Транскрибация завершилась со статусом: {job.status}")
+            return ""
 
-        print(transcript.text)
-        print()
-        print(f"Длина текста: {len(transcript.text)}")
-        return transcript.text
-        
     except Exception as err:
         logger.error(f"Ошибка при транскрибации: {err}")
+        raise Exception()
