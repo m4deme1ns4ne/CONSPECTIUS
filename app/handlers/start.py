@@ -10,6 +10,10 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmd_start(message: Message) -> Message:
-    """Обрабатывает команду пользователя для старта"""
+    """
+    Обрабатывает команду /start.
+
+    Отправляет пользователю стартовое сообщение с приветствием и кнопкой для начала работы.
+    """
     await message.answer(cmd.start_message,
                          reply_markup=kb.main)
