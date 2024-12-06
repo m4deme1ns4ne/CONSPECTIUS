@@ -9,7 +9,7 @@ main = ReplyKeyboardMarkup(keyboard=[
 )
 
 confirmation = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Ссылка для отпраки аудио", web_app=WebAppInfo(url="https://dacb-194-226-212-5.ngrok-free.app"))],
+    [InlineKeyboardButton(text="Ссылка для отпраки аудио", web_app=WebAppInfo(url="https://df92-5-18-188-83.ngrok-free.app/"))],
     [InlineKeyboardButton(text="Аудио скинуто ✔️", callback_data="select_language")]
 ])
 
@@ -24,8 +24,17 @@ select_language = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="🇰🇷 한국어", callback_data="ko"), InlineKeyboardButton(text="🇵🇱 Polski", callback_data="pl")],
     [InlineKeyboardButton(text="☕️ British English", callback_data="en_uk"), InlineKeyboardButton(text="🇹🇷 Türkçe", callback_data="tr")],
     [InlineKeyboardButton(text="🇺🇦 Українська", callback_data="uk"), InlineKeyboardButton(text="🇻🇳 Tiếng Việt", callback_data="vi")],
-    [InlineKeyboardButton(text="❌ Я не знаю", callback_data="cancel")]
+    [InlineKeyboardButton(text="❌ Я не знаю", callback_data="cancel_language")]
 ])
+
+async def select_length(language: str):
+    select_length = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📄 Короткий конспект", callback_data=f"low_{language}")],
+        [InlineKeyboardButton(text="📝 Подробный конспект", callback_data=f"medium_{language}")],
+        [InlineKeyboardButton(text="📚 Максимально подробный конспект", callback_data=f"high_{language}")],
+        [InlineKeyboardButton(text="❌ Я не знаю", callback_data=f"cancellength_{language}")]
+    ])
+    return select_length
 
 report_an_error = InlineKeyboardMarkup(
     inline_keyboard=[

@@ -23,6 +23,7 @@ router = Router()
 AUDIO_UPLOAD_PATH = "/Users/aleksandrvolzanin/pet_project/site_conspectius/uploads"
 DOCX_OUTPUT_PATH = "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/received_txt/input_file.docx"
 LANGUAGES = ("en", "en_au", "en_uk", "en_us", "es", "fr", "de", "it", "pt", "nl","hi", "ja", "zh", "fi", "ko", "pl", "ru", "tr", "uk", "vi")
+LENGHT_CONSPECT = ("low", "medium", "high")
 
 @router.message(F.text == "Сделать конспект 📄✨")
 async def handle_summarize_request(message: Message, state: FSMContext):
@@ -49,33 +50,47 @@ async def handle_summarize_request(message: Message, state: FSMContext):
     )
 
 @router.callback_query(F.data == "select_language")
-async def select_language(callback: CallbackQuery, bot: Bot):
-    await callback.message.edit_text(
-        text="Выберите язык для расшифровки аудио сообщения: 🎧🌍",
-        reply_markup=kb.select_language
-    )
-
-@router.callback_query(lambda callback: callback.data in LANGUAGES or callback.data == "cancel")
-async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMContext):
-    """
-    Обрабатывает запрос обратного вызова для подтверждения аудиофайла.
-
-    Эта функция проверяет существование загруженного аудиофайла,
-    транскрибирует его в текст, обрабатывает транскрипцию с помощью GPT,
-    преобразует обработанный текст в файл DOCX и отправляет файл
-    пользователю. 
-    """ 
-    # Проверка текущего состояния FSM и переход в состояние ожидания ответа (если необходимо)
-    current_state = await state.get_state()
-    if current_state == MainState.waiting_for_response.state:
-        await callback.message.reply("Пожалуйста, дождитесь завершения обработки предыдущего запроса. 😊")
+async def select_language(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    try:
+        await callback.message.edit_text(
+            text="Выберите язык для расшифровки аудио сообщения: 🎧🌍",
+            reply_markup=kb.select_language
+        )
+    except Exception as err:
+        logger.error(f"Ошибка при выборе языка: {err}")
+        await state.clear()
+        await send_error_message(bot, callback.message,
+                                 error="Произошла ошибка при выборе языка❗️")
         return
-    await state.set_state(MainState.waiting_for_response)
 
+@router.callback_query(lambda callback: callback.data in LANGUAGES or callback.data == "cancel_language")
+async def select_length(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    try:
+        language = callback.data
+        await callback.message.edit_text(
+            text=cmd.conspect_length,
+            reply_markup= await kb.select_length(language),
+            parse_mode=ParseMode.MARKDOWN
+        )
+    except Exception as err:
+        logger.error(f"Ошибка при выборе длины конспекта: {err}")
+        await state.clear()
+        await send_error_message(bot, callback.message,
+                                 error="Произошла ошибка при выборе языка❗️")
+        return
+
+@router.callback_query(lambda callback: "_" in callback.data)
+async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMContext):
     waiting_message = await callback.message.edit_text(
         text=cmd.audio_message_accepted,
         parse_mode=ParseMode.MARKDOWN
     )
+
+    data_parts = callback.data.split("_")
+    language = data_parts[0]
+    lenght_conspect = data_parts[1]
+
+    await callback.message.answer(f"Язык конспекта: {language}\nДлина конспекта: {lenght_conspect}")
 
     # Проверка наличия аудиофайла
     try:
