@@ -14,6 +14,7 @@ from app.utils.check_file_exists import check_any_file_exists
 from app.utils.conversion_txt_to_docx import txt_to_docx
 from app.core.handling import GPTResponse
 from app.core.states import MainState
+from app.utils.get_length_audio import get_length_audio
 
 
 router = Router()
@@ -29,8 +30,12 @@ async def handle_summarize_request(message: Message, state: FSMContext):
     Обработка запроса на создание конспекта. Отправляет инструкцию
     пользователю, как создать конспект.
     """
-
+    # Проверка текущего состояния FSM и переход в состояние ожидания ответа (если необходимо)
     current_state = await state.get_state()
+    if current_state == MainState.waiting_for_response.state:
+        await message.reply("Пожалуйста, дождитесь завершения обработки предыдущего запроса.")
+        return
+    await state.set_state(MainState.waiting_for_response)
 
     if current_state == MainState.waiting_for_response.state:
         await message.reply("Пожалуйста, подождите завершение обработки предыдущего запроса. ⏳")
@@ -63,7 +68,7 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
     # Проверка текущего состояния FSM и переход в состояние ожидания ответа (если необходимо)
     current_state = await state.get_state()
     if current_state == MainState.waiting_for_response.state:
-        await callback.message.reply("Пожалуйста, дождитесь завершения обработки предыдущего запроса.")
+        await callback.message.reply("Пожалуйста, дождитесь завершения обработки предыдущего запроса. 😊")
         return
     await state.set_state(MainState.waiting_for_response)
 
@@ -97,12 +102,24 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
         await send_error_message(bot, waiting_message,
                                  error="Произошла ошибка при расшифровке аудиофайла❗️")
         return
+    
+    #Определение длины аудио сообщения
+    try:
+        await edit_message_stage(bot, msg_edit=waiting_message, stage="Определение длины аудиосообщения 🎤")
+        length_audio_files = get_length_audio(file_path=audio_path)
+        logger.info("Длина аудио успешно определена.")
+    except Exception as err:
+        await state.clear()
+        logger.error(f"Ошибка при определении длины аудио: {err}")
+        await send_error_message(bot, waiting_message,
+                                 error="Произошла ошибка при определении длины аудиофайла❗️")
+        return
 
     # Обработка расшифровки через GPT
     try:
         await edit_message_stage(bot, msg_edit=waiting_message, stage="Обработка текста нейросетью 🤖")
         ai = GPTResponse()
-        conspect = await ai.processing_transcribing(transcription)
+        conspect = await ai.processing_transcribing(transcription, length_audio=length_audio_files)
         if not conspect:
             raise Exception()
         logger.info("Конспект успешно обработан GPT.")
@@ -141,9 +158,7 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
     # Удаление временного файла
     try:
         os.remove(DOCX_OUTPUT_PATH)
-# #___________________________
         os.remove(audio_path)
-# #___________________________
         logger.info("Временный файл успешно удален.")
     except Exception as err:
         logger.error(f"Ошибка при удалении временного файла: {err}")

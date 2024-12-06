@@ -9,7 +9,7 @@ main = ReplyKeyboardMarkup(keyboard=[
 )
 
 confirmation = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="Ссылка для отпраки аудио", web_app=WebAppInfo(url="https://19e3-5-18-188-83.ngrok-free.app/"))],
+    [InlineKeyboardButton(text="Ссылка для отпраки аудио", web_app=WebAppInfo(url="https://dacb-194-226-212-5.ngrok-free.app"))],
     [InlineKeyboardButton(text="Аудио скинуто ✔️", callback_data="select_language")]
 ])
 

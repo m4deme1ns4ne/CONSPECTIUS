@@ -1,5 +1,4 @@
 debug.log
 .env
-telegram-bot-api
 __pycache__/
 *.pyc

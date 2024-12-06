@@ -4,14 +4,14 @@ from pydub import AudioSegment
 # Подавление всех предупреждений
 warnings.filterwarnings("ignore")
 
-def get_length_audio(file_path_audio: str) -> float:
+def get_length_audio(file_path_audio: str) -> str:
     """Функция для измерения длительности аудио
 
     Args:
         file_path_audio (str): Путь к аудио
 
     Returns:
-        float: Параметры длительности аудио (минимальные, средние, максимальные)
+        str: Параметры длительности аудио (минимальные, средние, максимальные)
     """
     audio = AudioSegment.from_file(file_path_audio)
     duration_in_seconds = len(audio) / 1000  # Длительность в секундах

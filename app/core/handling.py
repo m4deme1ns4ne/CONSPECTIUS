@@ -3,16 +3,22 @@ from openai import AsyncOpenAI
 import httpx
 import os
 
-from .promt_for_gpt import beginning_text, middle_of_the_text, end_of_text
-from ..utils.split_text import TextSplitter
-from ..utils.count_tokens import count_tokens
+from app.core.promts_for_gpt.max_promt import (
+    beginning_text,
+    end_of_text,
+    middle_of_the_text,
+)
+from app.utils.count_tokens import count_tokens
+from app.utils.split_text import TextSplitter
 
 
 class GPTResponse:
     def __init__(self) -> None:
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        self.proxies = os.getenv("PROXY")
-        self.local_address = "0.0.0.0"
+        self.api_key: str = os.getenv("OPENAI_API_KEY", "")
+        if not self.api_key:
+            raise ValueError("OPENAI_API_KEY не найден в переменных окружения.")
+        
+        self.proxies: str = os.getenv("PROXY", "")
 
     async def get_openai_client(self):
         """
