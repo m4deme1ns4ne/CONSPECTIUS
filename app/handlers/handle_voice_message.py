@@ -51,6 +51,10 @@ async def handle_summarize_request(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == "select_language")
 async def select_language(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    """
+    Обработка callback, срабатывающего после нажатия кнопки "Аудио скинуто ✔️".
+    Показывает пользователю клавиатуру для выбора языка.
+    """
     try:
         await callback.message.edit_text(
             text="Выберите язык для расшифровки аудио сообщения: 🎧🌍",
@@ -65,6 +69,10 @@ async def select_language(callback: CallbackQuery, bot: Bot, state: FSMContext):
 
 @router.callback_query(lambda callback: callback.data in LANGUAGES or callback.data == "cancel_language")
 async def select_length(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    """
+    Обработка callback, срабатывающего после нажатия кнопки "Аудио скинуто ✔️".
+    Показывает пользователю клавиатуру для выбора длины конспекта.
+    """
     try:
         language = callback.data
         await callback.message.edit_text(
@@ -81,16 +89,24 @@ async def select_length(callback: CallbackQuery, bot: Bot, state: FSMContext):
 
 @router.callback_query(lambda callback: "_" in callback.data)
 async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    """
+    Обработка callback, срабатывающего после нажатия кнопки "Длина конспекта".
+    Показывает пользователю, что аудиосообщение было принято,
+    инициирует процесс транскрибирования аудио, обработки текста нейросетью,
+    конвертации текста в DOCX, отправки файла пользователю, 
+    а также логирует ошибки и отправляет сообщения об ошибках.
+    """
     waiting_message = await callback.message.edit_text(
         text=cmd.audio_message_accepted,
         parse_mode=ParseMode.MARKDOWN
     )
 
+    # Получение языка и длины конспекта
     data_parts = callback.data.split("_")
-    language = data_parts[0]
-    lenght_conspect = data_parts[1]
+    lenght_conspect = data_parts[0]
+    language = data_parts[1]
 
-    await callback.message.answer(f"Язык конспекта: {language}\nДлина конспекта: {lenght_conspect}")
+    logger.info(f"Язык: {language}, длина конспекта: {lenght_conspect}")
 
     # Проверка наличия аудиофайла
     try:
@@ -105,12 +121,10 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
 
     # Распознавание аудио
     try:
-        language = callback.data
         await edit_message_stage(bot, msg_edit=waiting_message, stage="Перевод аудиосообщения в текст 🎤")
         transcription = await transcribing_aai(file_path=audio_path, language=language)
         if not transcription:
             raise Exception("Транскрипция не выполнена.")
-        logger.info("Аудио успешно расшифровано.")
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при расшифровке аудио: {err}")
@@ -118,23 +132,28 @@ async def process_confirmation(callback: CallbackQuery, bot: Bot, state: FSMCont
                                  error="Произошла ошибка при расшифровке аудиофайла❗️")
         return
     
-    #Определение длины аудио сообщения
-    try:
-        await edit_message_stage(bot, msg_edit=waiting_message, stage="Определение длины аудиосообщения 🎤")
-        length_audio_files = get_length_audio(file_path=audio_path)
-        logger.info("Длина аудио успешно определена.")
-    except Exception as err:
-        await state.clear()
-        logger.error(f"Ошибка при определении длины аудио: {err}")
-        await send_error_message(bot, waiting_message,
-                                 error="Произошла ошибка при определении длины аудиофайла❗️")
-        return
+    # Если пользователь не знает желаемую длину конспекта, то происходит определение длины аудио
+
+    # А если пользователь знает желаемую длину конспекта, то остаётся изначальная переменная lenght_conspect
+
+    if lenght_conspect == "cancellength":
+        #Определение длины аудио сообщения
+        try:
+            await edit_message_stage(bot, msg_edit=waiting_message, stage="Определение длины аудиосообщения 🎤")
+            lenght_conspect = get_length_audio(file_path_audio=audio_path)
+            logger.info(f"Длина аудио успешно определена {lenght_conspect}")
+        except Exception as err:
+            await state.clear()
+            logger.error(f"Ошибка при определении длины аудио: {err}")
+            await send_error_message(bot, waiting_message,
+                                    error="Произошла ошибка при определении длины аудиофайла❗️")
+            return
 
     # Обработка расшифровки через GPT
     try:
         await edit_message_stage(bot, msg_edit=waiting_message, stage="Обработка текста нейросетью 🤖")
         ai = GPTResponse()
-        conspect = await ai.processing_transcribing(transcription, length_audio=length_audio_files)
+        conspect = await ai.processing_transcribing(transcription, lenght_conspect=lenght_conspect)
         if not conspect:
             raise Exception()
         logger.info("Конспект успешно обработан GPT.")

@@ -3,11 +3,9 @@ from openai import AsyncOpenAI
 import httpx
 import os
 
-from app.core.promts_for_gpt.max_promt import (
-    beginning_text,
-    end_of_text,
-    middle_of_the_text,
-)
+from app.core.promts_for_gpt import min_promt
+from app.core.promts_for_gpt import middle_promt 
+from app.core.promts_for_gpt import max_promt
 from app.utils.count_tokens import count_tokens
 from app.utils.split_text import TextSplitter
 
@@ -65,37 +63,68 @@ class GPTResponse:
             raise Exception("Произошла ошибка при обработке запроса.")
 
     @logger.catch
-    async def processing_transcribing(self, text: str) -> str:
-        splitter = TextSplitter(text)
-        parts = splitter.split()
+    async def processing_transcribing(self, text: str, lenght_conspect: str) -> str:
         model_gpt = "gpt-4o-mini"
 
         ansver = ""
-        for i, chunk in enumerate(parts):
-            if i == 0:
-                res = await self.gpt_answer(
-                                    text=chunk,
-                                    model_gpt=model_gpt,
-                                    promt=beginning_text)
-                ansver += f"{res}\n"
-            elif i == 1:
-                res = await self.gpt_answer(
-                                    text=chunk,
-                                    model_gpt=model_gpt,
-                                    promt=middle_of_the_text)
-                ansver += f"{res}\n"
-            else:
-                res = await self.gpt_answer(
-                                    text=chunk,
-                                    model_gpt=model_gpt,
-                                    promt=end_of_text)
-                ansver += f"{res}\n"
-        
 
-        model_name = "gpt-4o-mini"  # Укажите модель, которую вы используете
-        token_count = count_tokens(text, model=model_name)
+        if lenght_conspect == "low":
+            res = await self.gpt_answer(
+                                text=text,
+                                model_gpt=model_gpt,
+                                promt=min_promt.whole_part)
+            ansver = res
+            logger.info("Создан короткий конспект")
+
+        elif lenght_conspect == "medium":
+            splitter = TextSplitter(text)
+            parts = splitter.split()
+            for i, chunk in enumerate(parts):
+                if i == 0:
+                    res = await self.gpt_answer(
+                                        text=chunk,
+                                        model_gpt=model_gpt,
+                                        promt=middle_promt.first_part)
+                    ansver += f"{res}\n"
+                else:
+                    res = await self.gpt_answer(
+                                        text=chunk,
+                                        model_gpt=model_gpt,
+                                        promt=middle_promt.second_part)
+                    ansver += f"{res}\n"
+            logger.info("Создан подробный конспект")
+
+        elif lenght_conspect == "high":
+            splitter = TextSplitter(text)
+            parts = splitter.split()
+            for i, chunk in enumerate(parts):
+                if i == 0:
+                    res = await self.gpt_answer(
+                                        text=chunk,
+                                        model_gpt=model_gpt,
+                                        promt=max_promt.beginning_text)
+                    ansver += f"{res}\n"
+                elif i == 1:
+                    res = await self.gpt_answer(
+                                        text=chunk,
+                                        model_gpt=model_gpt,
+                                        promt=max_promt.middle_of_the_text)
+                    ansver += f"{res}\n"
+                else:
+                    res = await self.gpt_answer(
+                                        text=chunk,
+                                        model_gpt=model_gpt,
+                                        promt=max_promt.end_of_text)
+                    ansver += f"{res}\n"
+            logger.info("Создан очень подробный конспект")
+
+        # Подсчет входных токенов 
+        token_count_input = count_tokens(ansver, model=model_gpt)
+        # Подсчёт выходных токенов
+        token_count_output = count_tokens(text, model=model_gpt)
 
         logger.info(f"Конспект получен")
-        logger.info(f"Количество токенов для запроса: {token_count}")
+        logger.info(f"Количество входных токенов : {token_count_input}")
+        logger.info(f"Количество выходных токенов: {token_count_output}")
 
         return ansver

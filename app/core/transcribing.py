@@ -30,12 +30,18 @@ async def transcribing_aai(file_path: str, language: str) -> str:
     # Инициализация Transcriber и настройка конфигурации транскрибации
     transcriber = aai.Transcriber()
 
-    config = aai.TranscriptionConfig(
-        punctuate=False, 
-        format_text=False,
-        language_code=language if language != "cancel" else None,
-        language_detection=True if language == "cancel" else False
-    )
+    if language == "cancel":
+        config = aai.TranscriptionConfig(
+            punctuate=False, 
+            format_text=False,
+            language_detection=True
+        )
+    else:
+        config = aai.TranscriptionConfig(
+            punctuate=True, 
+            format_text=True,
+            language_code=language
+        )
 
     # Начало транскрибации
     try:

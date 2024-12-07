@@ -20,11 +20,11 @@ def get_length_audio(file_path_audio: str) -> str:
     lenght_audio = int(round((duration_in_minutes)))
 
     if lenght_audio <= 30:
-        return "min_settings"
+        return "low"
     if lenght_audio > 30 and lenght_audio <= 60:
-        return "middle_settings"
+        return "medium"
     if lenght_audio > 60:
-        return "max_settings"
+        return "high"
 
     return lenght_audio
 
