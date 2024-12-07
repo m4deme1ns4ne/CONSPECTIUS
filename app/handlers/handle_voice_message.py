@@ -103,13 +103,25 @@ async def select_language(
 @router.callback_query(
     lambda callback: callback.data in LANGUAGES
     or callback.data == "cancel_language"
+
+
+
+
+
+
+
+
 )
-async def select_length(callback: CallbackQuery, bot: Bot, state: FSMContext):
+async def select_length(
+    
+    
+    callback: CallbackQuery, bot: Bot, state: FSMContext):
     """
     Обработка callback, срабатывающего после нажатия кнопки "Аудио скинуто ✔️".
     Показывает пользователю клавиатуру для выбора длины конспекта.
     """
     try:
+
         language = callback.data
         await callback.message.edit_text(
             text=cmd.conspect_length,
