@@ -1,6 +1,5 @@
 from aiogram import Bot
 from aiogram.types import Message
-from loguru import logger
 
 import app.keyboards.keyboards as kb
 

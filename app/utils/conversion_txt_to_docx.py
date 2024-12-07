@@ -14,7 +14,7 @@ def txt_to_docx(text: str) -> None:
     # Полный путь к файлу
     file_path = os.path.join(
         "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/received_txt/",
-        f"input_file.docx",
+        "input_file.docx",
     )
 
     # Сохраняем документ в файл с расширением .docx
