@@ -1,12 +1,13 @@
-from aiogram.types import Message
-from aiogram.filters import CommandStart
 from aiogram import Router
+from aiogram.filters import CommandStart
+from aiogram.types import Message
 
-import app.templates.cmd_message as cmd
 import app.keyboards.keyboards as kb
+import app.templates.cmd_message as cmd
 
 
 router = Router()
+
 
 @router.message(CommandStart())
 async def cmd_start(message: Message) -> Message:
@@ -15,5 +16,4 @@ async def cmd_start(message: Message) -> Message:
 
     Отправляет пользователю стартовое сообщение с приветствием и кнопкой для начала работы.
     """
-    await message.answer(cmd.start_message,
-                         reply_markup=kb.main)
+    await message.answer(cmd.start_message, reply_markup=kb.main)

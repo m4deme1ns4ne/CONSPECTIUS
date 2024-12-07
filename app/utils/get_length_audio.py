@@ -1,8 +1,11 @@
 import warnings
+
 from pydub import AudioSegment
+
 
 # Подавление всех предупреждений
 warnings.filterwarnings("ignore")
+
 
 def get_length_audio(file_path_audio: str) -> str:
     """Функция для измерения длительности аудио
@@ -16,7 +19,7 @@ def get_length_audio(file_path_audio: str) -> str:
     audio = AudioSegment.from_file(file_path_audio)
     duration_in_seconds = len(audio) / 1000  # Длительность в секундах
     duration_in_minutes = duration_in_seconds / 60  # Длительность в минутах
-    
+
     lenght_audio = int(round((duration_in_minutes)))
 
     if lenght_audio <= 30:
@@ -28,7 +31,8 @@ def get_length_audio(file_path_audio: str) -> str:
 
     return lenght_audio
 
-#Пример использования функции 
+
+# Пример использования функции
 
 # FILE_PATH_AUDIO = "/Users/aleksandrvolzanin/pet_project/utils/testsadsadsa/Российский государственный педагогический университет им. А.И. Герцена 2.m4a"
 

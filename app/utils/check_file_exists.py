@@ -10,7 +10,7 @@ def check_any_file_exists(directory_path):
         # Если есть, записываем путь к первому файлу в переменную
         first_file_path = os.path.join(directory_path, files[0])
         return first_file_path
-    
+
     else:
         # Если файл не существует, возвращаем ошибку
         raise Exception("Файл не найден")

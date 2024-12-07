@@ -1,5 +1,6 @@
-from docx import Document
 import os
+
+from docx import Document
 
 
 def txt_to_docx(text: str) -> None:
@@ -11,7 +12,10 @@ def txt_to_docx(text: str) -> None:
     doc.add_paragraph(text)
 
     # Полный путь к файлу
-    file_path = os.path.join("/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/received_txt/", f"input_file.docx")
+    file_path = os.path.join(
+        "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/received_txt/",
+        f"input_file.docx",
+    )
 
     # Сохраняем документ в файл с расширением .docx
     doc.save(file_path)

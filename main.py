@@ -1,11 +1,12 @@
 import asyncio
+import os
+
 from aiogram import Bot, Dispatcher
 from dotenv import load_dotenv
 from loguru import logger
-import os
 
 from app.core.logger import file_logger
-from app.handlers import (start, handle_voice_message)
+from app.handlers import handle_voice_message, start
 
 
 @logger.catch
@@ -17,8 +18,7 @@ async def main() -> None:
     bot = Bot(token=os.getenv("BOT_TOKEN"))
     dp = Dispatcher()
 
-    dp.include_routers(start.router,
-                       handle_voice_message.router)
+    dp.include_routers(start.router, handle_voice_message.router)
     await dp.start_polling(bot)
 
 

@@ -56,6 +56,7 @@ class TextSplitter:
         """
         return f"TextSplitter(text='{self.text[:10]}...')"
 
+
 # Пример использования:
 # splitter = TextSplitter("abcdefghi")
 # parts = splitter.split()

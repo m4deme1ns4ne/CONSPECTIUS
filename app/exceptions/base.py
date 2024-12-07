@@ -8,6 +8,7 @@ class BaseAppError(Exception):
     Аргументы:
         message (str, optional): Сообщение об ошибке. По умолчанию "Произошла ошибка в телегрмм боте.".
     """
+
     def __init__(self, message="Произошла ошибка в телегрмм боте."):
         self.message = message
         super().__init__(self.message)

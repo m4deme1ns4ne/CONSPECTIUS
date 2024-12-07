@@ -1,13 +1,13 @@
-from loguru import logger
-
 from aiogram import Bot
 from aiogram.types import Message
+from loguru import logger
+
 import app.keyboards.keyboards as kb
 
 
-async def send_error_message(bot: Bot, msg_edit: Message, 
-                             error: str = None,
-                             message_to_user: str = None) -> None:
+async def send_error_message(
+    bot: Bot, msg_edit: Message, error: str = None, message_to_user: str = None
+) -> None:
     """Универсальная функция отправки сообщения об ошибке."""
     if error is None:
         error = "Произошла ошибка при обработке вашего аудио. ⚠️"
