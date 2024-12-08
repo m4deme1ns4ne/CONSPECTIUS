@@ -7,12 +7,12 @@ from aiogram.types import (
 )
 
 
-main = ReplyKeyboardMarkup(
+main_menu = ReplyKeyboardMarkup(
     keyboard=[[KeyboardButton(text="Сделать конспект 📄✨")]],
     resize_keyboard=True,
 )
 
-confirmation = InlineKeyboardMarkup(
+audio_confirmation_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(
@@ -30,7 +30,7 @@ confirmation = InlineKeyboardMarkup(
     ]
 )
 
-select_language = InlineKeyboardMarkup(
+language_selection_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text="🇷🇺 Русский", callback_data="ru"),
@@ -89,7 +89,7 @@ select_language = InlineKeyboardMarkup(
 
 
 async def select_length(language: str):
-    select_length = InlineKeyboardMarkup(
+    length_selection_menu = InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
@@ -117,10 +117,10 @@ async def select_length(language: str):
             ],
         ]
     )
-    return select_length
+    return length_selection_menu
 
 
-report_an_error = InlineKeyboardMarkup(
+error_report_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from app.core.logger import file_logger
-from app.handlers import handle_voice_message, start
+from app.handlers import mainstream, preprocessing, start
 
 
 @logger.catch
@@ -18,7 +18,7 @@ async def main() -> None:
     bot = Bot(token=os.getenv("BOT_TOKEN"))
     dp = Dispatcher()
 
-    dp.include_routers(start.router, handle_voice_message.router)
+    dp.include_routers(start.router, preprocessing.router, mainstream.router)
     await dp.start_polling(bot)
 
 

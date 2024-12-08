@@ -1,4 +1,4 @@
-from app.handlers import handle_voice_message, start
+from app.handlers import preprocessing, start, mainstream
 
 
-__all__ = [start, handle_voice_message]
+__all__ = ["start", "preprocessing", "mainstream"]

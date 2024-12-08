@@ -5,8 +5,8 @@ import time
 import assemblyai as aai
 from loguru import logger
 
-from ..utils.convert_seconds import convert_seconds
-from ..utils.upload_file import upload_file
+from app.utils.convert_seconds import convert_seconds
+from app.utils.upload_file import upload_file
 
 
 async def transcribing_aai(file_path: str, language: str) -> str:

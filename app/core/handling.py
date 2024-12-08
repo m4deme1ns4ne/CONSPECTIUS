@@ -9,19 +9,20 @@ from app.utils.count_tokens import count_tokens
 from app.utils.split_text import TextSplitter
 
 
-class GPTAgent:
+class GPTResponse:
     def __init__(self) -> None:
-        """Инициализация агента GPT."""
         self.api_key: str = os.getenv("OPENAI_API_KEY", "")
         if not self.api_key:
             raise ValueError(
-                "OPENAI_API_KEY не найден в переменных окружения."
+                "OPENAI_API_KEY не найден в переменных окружения."
             )
 
         self.proxies: str = os.getenv("PROXY", "")
 
     async def get_openai_client(self):
-        """Создание клиента OpenAI."""
+        """
+        Создание клиента OpenAI.
+        """
         return AsyncOpenAI(
             api_key=self.api_key,
             http_client=httpx.AsyncClient(
@@ -30,46 +31,39 @@ class GPTAgent:
             ),
         )
 
+    @logger.catch
     async def gpt_answer(self, text: str, model_gpt: str, promt: str) -> str:
-        """Отправляет запрос в GPT и возвращает ответ."""
-        try:
-            # Создаем клиент OpenAI
-            client = await self.get_openai_client()
+        # Создаем клиент OpenAI
+        client = await self.get_openai_client()
 
-            # Отправляем запрос в GPT с нужным промтом и текстом
-            response = await client.chat.completions.create(
-                model=model_gpt,
-                messages=[
-                    {"role": "system", "content": str(promt)},
-                    {"role": "user", "content": text},
-                ],
-            )
+        # Отправляем запрос в GPT
+        response = await client.chat.completions.create(
+            model=model_gpt,
+            messages=[
+                {"role": "system", "content": str(promt)},
+                {"role": "user", "content": text},
+            ],
+        )
+        return response.choices[0].message.content
 
-            # Возвращаем ответ от GPT
-            return response.choices[0].message.content
-
-        except Exception as err:
-            logger.error(f"Ошибка при обработке запроса: {err}")
-            raise Exception("Произошла ошибка при обработке запроса.")
-
-    async def process_transcribing(
-        self, text: str, length_conspect: str
+    async def processing_transcribing(
+        self, text: str, lenght_conspect: str
     ) -> str:
         """Обрабатывает создание конспекта на основе заданной длины."""
-        model_gpt = "gpt-4"
+        model_gpt = "gpt-4o-mini"
 
         # Инициализация пустой строки для конспекта
         ansver = ""
 
         # Короткий конспект
-        if length_conspect == "low":
+        if lenght_conspect == "low":
             ansver = await self.gpt_answer(
                 text, model_gpt, min_promt.whole_part
             )
             logger.info("Создан короткий конспект")
 
         # Средний конспект
-        elif length_conspect == "medium":
+        elif lenght_conspect == "medium":
             splitter = TextSplitter(text)
             parts = splitter.split()
             first_part = await self.gpt_answer(

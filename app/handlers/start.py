@@ -16,4 +16,4 @@ async def cmd_start(message: Message) -> Message:
 
     Отправляет пользователю стартовое сообщение с приветствием и кнопкой для начала работы.
     """
-    await message.answer(cmd.start_message, reply_markup=kb.main)
+    await message.answer(cmd.start_message, reply_markup=kb.main_menu)
