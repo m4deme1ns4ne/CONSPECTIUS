@@ -108,7 +108,8 @@ class GPTResponse:
         # Подсчёт выходных токенов
         token_count_output = count_tokens(text, model=model_gpt)
 
-        logger.info(f"Количество входных токенов: {token_count_input}")
-        logger.info(f"Количество выходных токенов: {token_count_output}")
+        logger.debug(
+            f"Количество входных токенов: {token_count_input}, Количество выходных токенов: {token_count_output}"
+        )
 
         return ansver

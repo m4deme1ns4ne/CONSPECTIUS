@@ -51,7 +51,7 @@ async def process_confirmation(
     # Проверка наличия аудиофайла
     try:
         audio_path = check_any_file_exists(AUDIO_UPLOAD_PATH)
-        logger.info("Аудио найдено")
+        logger.debug("Аудио найдено")
     except Exception as err:
         await state.clear()
         logger.error(f"Файл не найден: {err}")
@@ -72,6 +72,10 @@ async def process_confirmation(
         )
         if not transcription:
             raise Exception("Транскрипция не выполнена.")
+        # ----------------------------------------------------------------
+        with open("transcription.txt", "w") as f:
+            f.write(transcription)
+    # ----------------------------------------------------------------
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при расшифровке аудио: {err}")
@@ -133,7 +137,7 @@ async def process_confirmation(
     # Конвертация текста в DOCX
     try:
         txt_to_docx(text=conspect)
-        logger.info("Файл успешно конвертирован в .docx.")
+        logger.debug("Файл успешно конвертирован в .docx.")
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при конвертации файла: {err}")
@@ -152,7 +156,7 @@ async def process_confirmation(
         )
         await callback.message.answer_document(input_file)
         await state.clear()
-        logger.info("Файл успешно отправлен пользователю.")
+        logger.debug("Файл успешно отправлен пользователю.")
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при отправке файла: {err}")
@@ -167,6 +171,6 @@ async def process_confirmation(
     try:
         os.remove(DOCX_OUTPUT_PATH)
         os.remove(audio_path)
-        logger.info("Временный файл успешно удален.")
+        logger.debug("Временный файл успешно удален.")
     except Exception as err:
         logger.error(f"Ошибка при удалении временного файла: {err}")

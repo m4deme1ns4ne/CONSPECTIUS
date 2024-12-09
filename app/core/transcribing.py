@@ -23,7 +23,7 @@ async def transcribing_aai(file_path: str, language: str) -> str:
     # Обработка ключа API AssemblyAI
     try:
         aai.settings.api_key = os.getenv("ASSEMBLY_AI_API")
-        logger.info("Ключ API AssemblyAI обработан успешно.")
+        logger.debug("Ключ API AssemblyAI обработан успешно.")
     except Exception as err:
         logger.error(f"Ошибка при обработке ASSEMBLY_AI_API: {err}")
         return ""
@@ -42,9 +42,9 @@ async def transcribing_aai(file_path: str, language: str) -> str:
 
     # Начало транскрибации
     try:
-        logger.info("Загрузка файла для транскрибации.")
+        logger.debug("Загрузка файла для транскрибации.")
         audio_url = await upload_file(file_path)
-        logger.info("Файл успешно загружен. Начало транскрибации.")
+        logger.debug("Файл успешно загружен. Начало транскрибации.")
 
         start_time = time.perf_counter()
 
@@ -60,9 +60,8 @@ async def transcribing_aai(file_path: str, language: str) -> str:
 
         if job.status == "completed":
             transcription_text = job.text
-            logger.info("Транскрибация завершена успешно.")
-            logger.info(
-                f"Время выполнения транскрибации: {convert_seconds(completion_time)}"
+            logger.debug(
+                f"Транскрибация завершена успешно. Время выполнения транскрибации: {convert_seconds(completion_time)}"
             )
             return transcription_text
         else:
