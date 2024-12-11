@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, FSInputFile
 from loguru import logger
 
 import app.templates.cmd_message as cmd
-from app.core.handling import GPTResponse
+from app.core.handling import GPTClient, GPTConfig, GPTResponse
 from app.core.transcribing import AssemblyAIConfig, AudioToText
 from app.templates.edit_message_stage import edit_message_stage
 from app.templates.send_error_message import send_error_message
@@ -67,9 +67,9 @@ async def process_confirmation(
             msg_edit=waiting_message,
             stage="Перевод аудиосообщения в текст 🎤",
         )
-        config = AssemblyAIConfig()
-        audio = AudioToText(config)
-        transcription = await audio.transcribing(
+        config_transcribing = AssemblyAIConfig()
+        audio_to_text = AudioToText(config=config_transcribing)
+        transcription = await audio_to_text.transcribing(
             file_path=audio_path, language=language
         )
         if not transcription:
@@ -118,8 +118,10 @@ async def process_confirmation(
             msg_edit=waiting_message,
             stage="Обработка текста нейросетью 🤖",
         )
-        ai = GPTResponse()
-        conspect = await ai.processing_transcribing(
+        config_gpt = GPTConfig()
+        gpt_client = GPTClient(config_gpt)
+        answer_gpt = GPTResponse(gpt_client=gpt_client)
+        conspect = await answer_gpt.processing_conspect(
             text=transcription, lenght_conspect=lenght_conspect
         )
         logger.info("Конспект успешно обработан GPT.")

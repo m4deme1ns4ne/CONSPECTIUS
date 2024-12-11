@@ -10,27 +10,53 @@ from app.utils.count_tokens import count_tokens
 from app.utils.split_text import TextSplitter
 
 
-class GPTResponse:
+class GPTConfig:
+    """Класс с данными конфигурации GPT."""
+
     def __init__(self) -> None:
-        self.api_key: str = os.getenv("OPENAI_API_KEY", "")
-        if not self.api_key:
+        self._gpt_api_key: str = os.getenv("OPENAI_API_KEY", "")
+        if not self._gpt_api_key:
             raise ValueError(
                 "OPENAI_API_KEY не найден в файле .env или переменных окружения."
             )
+        # Прокси опционально
+        self._proxies: str = os.getenv("PROXY", "")
 
-        self.proxies: str = os.getenv("PROXY", "")
+    @property
+    def gpt_api_key(self):
+        return self._gpt_api_key
+
+    @property
+    def proxies(self):
+        return self._proxies
+
+
+class GPTClient:
+    """Класс для создания клиента GPT."""
+
+    def __init__(self, config: GPTConfig) -> None:
+        self.config: GPTConfig = config
 
     async def get_openai_client(self):
         """
         Создание клиента OpenAI.
         """
         return AsyncOpenAI(
-            api_key=self.api_key,
+            api_key=self.config._gpt_api_key,
             http_client=httpx.AsyncClient(
-                proxies=self.proxies,
-                transport=httpx.HTTPTransport(local_address=self.proxies),
+                proxies=self.config._proxies,
+                transport=httpx.HTTPTransport(
+                    local_address=self.config._proxies
+                ),
             ),
         )
+
+
+class GPTResponse:
+    """Класс для получения ответа от GPT."""
+
+    def __init__(self, gpt_client: GPTClient) -> None:
+        self.gpt_client: GPTClient = gpt_client
 
     @logger.catch
     async def gpt_answer(self, text: str, model_gpt: str, promt: str) -> str:
@@ -45,7 +71,7 @@ class GPTResponse:
             str: Результат ответа gpt
         """
         # Создаем клиент OpenAI
-        client = await self.get_openai_client()
+        client: GPTClient = await self.gpt_client.get_openai_client()
 
         # Отправляем запрос в GPT
         response = await client.chat.completions.create(
@@ -55,9 +81,16 @@ class GPTResponse:
                 {"role": "user", "content": text},
             ],
         )
-        return response.choices[0].message.content
 
-    async def processing_transcribing(
+        answer_gpt = response.choices[0].message.content
+
+        if answer_gpt is None:
+            logger.info("Ответ gpt пустой")
+            raise EmptyTextError()
+
+        return answer_gpt
+
+    async def processing_conspect(
         self, text: str, lenght_conspect: str
     ) -> str:
         """Обрабатывает создание конспекта на основе заданной длины.
@@ -73,7 +106,7 @@ class GPTResponse:
 
         # Короткий конспект
         if lenght_conspect == "low":
-            conspect: str = await self.gpt_answer(
+            conspect = await self.gpt_answer(
                 text, model_gpt, min_promt.whole_part
             )
             logger.info("Создан короткий конспект")
@@ -120,10 +153,6 @@ class GPTResponse:
             )
 
             logger.info("Создан очень подробный конспект")
-
-        if not conspect:
-            logger.error("Конспект пустой")
-            raise EmptyTextError()
 
         # Подсчет входных токенов
         token_count_input = count_tokens(text, model=model_gpt)

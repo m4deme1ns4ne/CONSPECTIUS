@@ -11,8 +11,10 @@ from app.utils.upload_file import upload_file
 
 
 class AssemblyAIConfig:
+    """Класс с данными конфигурации AssemblyAI."""
+
     def __init__(self) -> None:
-        self._assemblyai_api_key = os.getenv("ASSEMBLY_AI_API", "")
+        self._assemblyai_api_key: str = os.getenv("ASSEMBLY_AI_API", "")
         if not self._assemblyai_api_key:
             raise ValueError(
                 "ASSEMBLY_AI_API не найден в файле .env или переменных окружения."
@@ -25,9 +27,11 @@ class AssemblyAIConfig:
 
 
 class AudioToText:
+    """Класс для получения ответа от AssemblyAI."""
+
     def __init__(self, config: AssemblyAIConfig):
-        self.config = config
-        self.transcriber = aai.Transcriber()
+        self.config: AssemblyAIConfig = config
+        self.transcriber: aai.Transcriber = aai.Transcriber()
 
     async def transcribing(self, file_path: str, language: str) -> str:
         """
@@ -41,7 +45,7 @@ class AudioToText:
             str: Транскрибированный текст.
         """
         # Общие параметры конфигурации транскрибации
-        common_config = {
+        common_config: dict[str:bool, str:bool] = {
             # Пунктуация
             "punctuate": True,
             # Форматирование текста
@@ -60,20 +64,20 @@ class AudioToText:
 
         # Загрузка файла
         logger.debug("Загрузка файла для транскрибации.")
-        audio_url = await upload_file(file_path)
+        audio_url: str = await upload_file(file_path)
         logger.debug(f"Файл успешно загружен. URL: {audio_url}")
         logger.debug("Начало транскрибации")
 
-        start_time = time.perf_counter()
+        start_time: time = time.perf_counter()
 
         # Инициация транскрипции и получение Future
         job_future = self.transcriber.transcribe_async(audio_url, config)
 
         # Оборачивание concurrent.futures.Future в asyncio.Future
-        job = await asyncio.wrap_future(job_future)
+        job: asyncio.Future = await asyncio.wrap_future(job_future)
 
-        end_time = time.perf_counter()
-        completion_time = end_time - start_time
+        end_time: time = time.perf_counter()
+        completion_time: int = end_time - start_time
 
         if job.status == "completed":
             logger.debug(
