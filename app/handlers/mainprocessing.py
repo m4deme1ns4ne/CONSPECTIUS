@@ -8,7 +8,7 @@ from loguru import logger
 
 import app.templates.cmd_message as cmd
 from app.core.handling import GPTResponse
-from app.core.transcribing import transcribing_aai
+from app.core.transcribing import AssemblyAIConfig, AudioToText
 from app.templates.edit_message_stage import edit_message_stage
 from app.templates.send_error_message import send_error_message
 from app.utils.check_file_exists import check_any_file_exists
@@ -67,7 +67,9 @@ async def process_confirmation(
             msg_edit=waiting_message,
             stage="Перевод аудиосообщения в текст 🎤",
         )
-        transcription = await transcribing_aai(
+        config = AssemblyAIConfig()
+        audio = AudioToText(config)
+        transcription = await audio.transcribing(
             file_path=audio_path, language=language
         )
         if not transcription:
@@ -120,9 +122,6 @@ async def process_confirmation(
         conspect = await ai.processing_transcribing(
             text=transcription, lenght_conspect=lenght_conspect
         )
-        if not conspect:
-            logger.error("Коснпект пустой")
-            raise Exception()
         logger.info("Конспект успешно обработан GPT.")
     except Exception as err:
         await state.clear()

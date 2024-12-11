@@ -1,10 +1,8 @@
-from aiogram.types import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    KeyboardButton,
-    ReplyKeyboardMarkup,
-    WebAppInfo,
-)
+from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
+                           KeyboardButton, ReplyKeyboardMarkup, WebAppInfo,)
+
+
+URL = "https://dec2-5-18-188-83.ngrok-free.app"
 
 
 main_menu = ReplyKeyboardMarkup(
@@ -17,9 +15,7 @@ audio_confirmation_menu = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(
                 text="Ссылка для отпраки аудио",
-                web_app=WebAppInfo(
-                    url="https://df92-5-18-188-83.ngrok-free.app/"
-                ),
+                web_app=WebAppInfo(url=URL),
             )
         ],
         [

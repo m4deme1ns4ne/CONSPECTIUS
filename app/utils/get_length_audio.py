@@ -34,9 +34,6 @@ def get_length_audio(file_path_audio: str) -> str:
 
 # Пример использования функции
 
-# FILE_PATH_AUDIO = "/Users/aleksandrvolzanin/pet_project/utils/testsadsadsa/Российский государственный педагогический университет им. А.И. Герцена 2.m4a"
+# FILE_PATH_AUDIO = "..."
 
-# try:
-#     print(get_length_audio(FILE_PATH_AUDIO)) -> max_settings (if > 60)
-# except Exception as e:
-#     print(f"Error: {e}")
+# print(get_length_audio(FILE_PATH_AUDIO)) # Вывод max_settings если > 60

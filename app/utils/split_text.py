@@ -1,4 +1,4 @@
-from ..exceptions.input_errors import EmptyTextError
+from app.errors.empty_text import EmptyTextError
 
 
 class TextSplitter:
@@ -17,12 +17,12 @@ class TextSplitter:
             raise TypeError("Входные данные должны быть строкой.")
         self.text = text
 
-    def split(self) -> tuple[str, str, str]:
+    def split(self, n_parts: int) -> str:
         """
-        Разделяет текст на три примерно равные части.
+        Разделяет текст равные части.
 
         Return:
-            tuple[str, str, str]: Три части текста в виде строк.
+            str: Строка поделённая на несколько частей.
 
         Raises:
             EmptyTextError: Если текст пустой
@@ -30,34 +30,23 @@ class TextSplitter:
         if self.text is None:
             return EmptyTextError()
 
-        n = len(self.text)
+        n = len(self.text) // n_parts
 
-        # Вычисление индексов разделения
-        part_size = n // 3
-        remainder = n % 3
+        if n_parts == 3:
+            part_1 = self.text[:n]
+            part_2 = self.text[n : 2 * n]
+            part_3 = self.text[2 * n :]
 
-        # Корректировка индексов разделения для распределения остатка
-        split_1 = part_size + (1 if remainder > 0 else 0)
-        split_2 = split_1 + part_size + (1 if remainder > 1 else 0)
+            return f"1.Начало: {part_1}.\n2.Середина: {part_2}.\n3.Конец: {part_3}."
 
-        # Выполнение разделения
-        part_1 = self.text[:split_1]
-        part_2 = self.text[split_1:split_2]
-        part_3 = self.text[split_2:]
+        part_1 = self.text[:n]
+        part_2 = self.text[n:]
 
-        return f"1. {part_1}", f"2. {part_2}", f"3. {part_3}"
-
-    def __repr__(self) -> str:
-        """
-        Возвращает строковое представление экземпляра TextSplitter.
-
-        Возвращает:
-            str: Представление объекта.
-        """
-        return f"TextSplitter(text='{self.text[:10]}...')"
+        return f"1.Первая половина: {part_1}.\n2.Вторая половина: {part_2}."
 
 
 # Пример использования:
 # splitter = TextSplitter("abcdefghi")
-# parts = splitter.split()
-# print(parts)  # Вывод: ('abc', 'def', 'ghi')
+# parts = splitter.split(n_parts=2)
+# print(parts)  # Вывод: Первая половина: abcd.
+#               #        Вторая половина: efghi.
