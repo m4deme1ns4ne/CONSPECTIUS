@@ -8,22 +8,16 @@ from loguru import logger
 
 import app.templates.cmd_message as cmd
 from app.core.handling import GPTClient, GPTConfig, GPTResponse
+from app.core.states import MainState
 from app.core.transcribing import AssemblyAIConfig, AudioToText
 from app.templates.edit_message_stage import edit_message_stage
 from app.templates.send_error_message import send_error_message
-from app.utils.check_file_exists import check_any_file_exists
-from app.utils.conversion_txt_to_docx import txt_to_docx
+from app.utils.check_file_exists import AudioManager, CheckAudioConfig
+from app.utils.conversion_txt_to_docx import DocumentConfig, DocumentManager
 from app.utils.get_length_audio import get_length_audio
 
 
 router = Router()
-
-
-# Конфигурационные параметры, нужно заменить на базу данных
-AUDIO_UPLOAD_PATH = (
-    "/Users/aleksandrvolzanin/pet_project/site_conspectius/uploads"
-)
-DOCX_OUTPUT_PATH = "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/received_txt/input_file.docx"
 
 
 @router.callback_query(lambda callback: "_" in callback.data)
@@ -37,9 +31,21 @@ async def process_confirmation(
     конвертации текста в DOCX, отправки файла пользователю,
     а также логирует ошибки и отправляет сообщения об ошибках.
     """
+
+    # Проверка текущего состояния FSM и переход в состояние ожидания ответа (если необходимо)
+    current_state = await state.get_state()
+    if current_state == MainState.waiting_for_response.state:
+        await callback.message.reply(
+            "Пожалуйста, подождите завершение обработки предыдущего запроса. ⏳"
+        )
+        return
+    await state.set_state(MainState.waiting_for_response)
+
     waiting_message = await callback.message.edit_text(
         text=cmd.audio_message_accepted, parse_mode=ParseMode.MARKDOWN
     )
+
+    telegram_id = callback.from_user.id
 
     # Получение языка и длины конспекта
     data_parts = callback.data.split("_")
@@ -50,8 +56,10 @@ async def process_confirmation(
 
     # Проверка наличия аудиофайла
     try:
-        audio_path = check_any_file_exists(AUDIO_UPLOAD_PATH)
-        logger.debug("Аудио найдено")
+        check_audio_config = CheckAudioConfig()
+        audio_manager = AudioManager(config=check_audio_config)
+        audio_path = audio_manager.check_audio_file(telegram_id)
+        logger.debug(f"Аудио найдено: {audio_path}")
     except Exception as err:
         await state.clear()
         logger.error(f"Файл не найден: {err}")
@@ -120,7 +128,7 @@ async def process_confirmation(
         )
         config_gpt = GPTConfig()
         gpt_client = GPTClient(config_gpt)
-        answer_gpt = GPTResponse(gpt_client=gpt_client)
+        answer_gpt = GPTResponse(gpt_client)
         conspect = await answer_gpt.processing_conspect(
             text=transcription, lenght_conspect=lenght_conspect
         )
@@ -137,7 +145,10 @@ async def process_confirmation(
 
     # Конвертация текста в DOCX
     try:
-        txt_to_docx(text=conspect)
+        doc_config = DocumentConfig()
+        doc_manager = DocumentManager(doc_config)
+        doc_manager.txt_to_docx(conspect, telegram_id)
+        doc_file_path = doc_manager.path_docx
         logger.debug("Файл успешно конвертирован в .docx.")
     except Exception as err:
         await state.clear()
@@ -151,7 +162,7 @@ async def process_confirmation(
 
     # Отправка файла пользователю
     try:
-        input_file = FSInputFile(DOCX_OUTPUT_PATH)
+        input_file = FSInputFile(doc_file_path)
         await edit_message_stage(
             bot, msg_edit=waiting_message, text="Ваш конспект ☺️"
         )
@@ -170,7 +181,7 @@ async def process_confirmation(
 
     # Удаление временного файла
     try:
-        os.remove(DOCX_OUTPUT_PATH)
+        os.remove(doc_file_path)
         os.remove(audio_path)
         logger.debug("Временный файл успешно удален.")
     except Exception as err:

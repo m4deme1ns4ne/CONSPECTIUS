@@ -2,7 +2,7 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup, WebAppInfo,)
 
 
-URL = "https://dec2-5-18-188-83.ngrok-free.app"
+URL = "https://61c2-176-59-18-86.ngrok-free.app"
 
 
 main_menu = ReplyKeyboardMarkup(
@@ -14,13 +14,13 @@ audio_confirmation_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(
-                text="Ссылка для отпраки аудио",
+                text="Ссылка для отпраки аудио 🔗",
                 web_app=WebAppInfo(url=URL),
             )
         ],
         [
             InlineKeyboardButton(
-                text="Аудио скинуто ✔️", callback_data="select_language"
+                text="Аудио скинуто ✅", callback_data="select_language"
             )
         ],
     ]
@@ -28,15 +28,16 @@ audio_confirmation_menu = InlineKeyboardMarkup(
 
 language_selection_menu = InlineKeyboardMarkup(
     inline_keyboard=[
+        [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="ru")],
         [
-            InlineKeyboardButton(text="🇷🇺 Русский", callback_data="ru"),
             InlineKeyboardButton(
                 text="🇦🇺 Australian English", callback_data="en_au"
             ),
+            InlineKeyboardButton(text="🇻🇳 Tiếng Việt", callback_data="vi"),
         ],
         [
             InlineKeyboardButton(
-                text="☕️ British English", callback_data="en_uk"
+                text="🇬🇧 British English", callback_data="en_uk"
             ),
             InlineKeyboardButton(text="🇺🇸 US English", callback_data="en_us"),
         ],
@@ -65,14 +66,8 @@ language_selection_menu = InlineKeyboardMarkup(
             InlineKeyboardButton(text="🇵🇱 Polski", callback_data="pl"),
         ],
         [
-            InlineKeyboardButton(
-                text="☕️ British English", callback_data="en_uk"
-            ),
             InlineKeyboardButton(text="🇹🇷 Türkçe", callback_data="tr"),
-        ],
-        [
             InlineKeyboardButton(text="🇺🇦 Українська", callback_data="uk"),
-            InlineKeyboardButton(text="🇻🇳 Tiếng Việt", callback_data="vi"),
         ],
         [
             InlineKeyboardButton(

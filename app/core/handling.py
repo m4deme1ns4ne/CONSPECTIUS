@@ -35,9 +35,9 @@ class GPTClient:
     """Класс для создания клиента GPT."""
 
     def __init__(self, config: GPTConfig) -> None:
-        self.config: GPTConfig = config
+        self._config: GPTConfig = config
 
-    async def get_openai_client(self):
+    async def create_openai_client(self):
         """
         Создание клиента OpenAI.
         """
@@ -51,12 +51,20 @@ class GPTClient:
             ),
         )
 
+    @property
+    def config(self):
+        return self._config
+
 
 class GPTResponse:
     """Класс для получения ответа от GPT."""
 
     def __init__(self, gpt_client: GPTClient) -> None:
-        self.gpt_client: GPTClient = gpt_client
+        self._gpt_client: GPTClient = gpt_client
+
+    @property
+    def gpt_client(self):
+        return self._gpt_client
 
     @logger.catch
     async def gpt_answer(self, text: str, model_gpt: str, promt: str) -> str:
@@ -71,7 +79,7 @@ class GPTResponse:
             str: Результат ответа gpt
         """
         # Создаем клиент OpenAI
-        client: GPTClient = await self.gpt_client.get_openai_client()
+        client: GPTClient = await self.gpt_client.create_openai_client()
 
         # Отправляем запрос в GPT
         response = await client.chat.completions.create(

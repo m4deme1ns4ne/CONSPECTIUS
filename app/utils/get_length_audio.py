@@ -33,7 +33,5 @@ def get_length_audio(file_path_audio: str) -> str:
 
 
 # Пример использования функции
-
 # FILE_PATH_AUDIO = "..."
-
 # print(get_length_audio(FILE_PATH_AUDIO)) # Вывод max_settings если > 60
