@@ -37,6 +37,10 @@ class GPTClient:
     def __init__(self, config: GPTConfig) -> None:
         self._config: GPTConfig = config
 
+    @property
+    def config(self):
+        return self._config
+
     async def create_openai_client(self):
         """
         Создание клиента OpenAI.
@@ -50,10 +54,6 @@ class GPTClient:
                 ),
             ),
         )
-
-    @property
-    def config(self):
-        return self._config
 
 
 class GPTResponse:

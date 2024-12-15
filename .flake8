@@ -1,4 +1,4 @@
 [flake8]
-exclude = ".git,__pycache__,__init__.py"
+exclude = ".git,__pycache__"
 max-line-length = 79
 ignore = E501, W293, W291, W503, E203
