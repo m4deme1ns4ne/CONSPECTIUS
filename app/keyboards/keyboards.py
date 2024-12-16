@@ -2,11 +2,14 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup, WebAppInfo,)
 
 
-URL = "https://61c2-176-59-18-86.ngrok-free.app"
+URL = "https://f5c9-5-18-188-83.ngrok-free.app"
 
 
 main_menu = ReplyKeyboardMarkup(
-    keyboard=[[KeyboardButton(text="Сделать конспект 📄✨")]],
+    keyboard=[
+        [KeyboardButton(text="Сделать конспект 📄✨")],
+        [KeyboardButton(text="Подписка 🌟")],
+    ],
     resize_keyboard=True,
 )
 
@@ -84,13 +87,13 @@ async def select_length(language: str):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="📄 Короткий конспект",
+                    text="📄 Саммари",
                     callback_data=f"low_{language}",
                 )
             ],
             [
                 InlineKeyboardButton(
-                    text="📝 Подробный конспект",
+                    text="📝 Основное содержание",
                     callback_data=f"medium_{language}",
                 )
             ],

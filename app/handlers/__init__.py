@@ -1,4 +1,5 @@
-from app.handlers import mainprocessing, preprocessing, start
+from app.handlers import (any_text, mainprocessing, payments, preprocessing,
+                          start,)
 
 
-__all__ = ["start", "preprocessing", "mainprocessing"]
+__all__ = ["start", "preprocessing", "mainprocessing", "payments", "any_text"]

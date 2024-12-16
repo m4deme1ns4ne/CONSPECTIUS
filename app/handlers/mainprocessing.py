@@ -73,7 +73,7 @@ async def process_confirmation(
         await edit_message_stage(
             bot,
             msg_edit=waiting_message,
-            stage="Перевод аудиосообщения в текст 🎤",
+            stage="Обработка аудио нейросетью 🎤🤖\n\nОбычно процесс занимает от 3 до 8 минут ⏳",
         )
         config_transcribing = AssemblyAIConfig()
         audio_to_text = AudioToText(config=config_transcribing)
@@ -102,11 +102,6 @@ async def process_confirmation(
     if lenght_conspect == "cancellength":
         # Определение длины аудио сообщения
         try:
-            await edit_message_stage(
-                bot,
-                msg_edit=waiting_message,
-                stage="Определение длины аудиосообщения 🎤",
-            )
             lenght_conspect = get_length_audio(file_path_audio=audio_path)
             logger.info(f"Длина аудио успешно определена {lenght_conspect}")
         except Exception as err:
@@ -124,7 +119,7 @@ async def process_confirmation(
         await edit_message_stage(
             bot,
             msg_edit=waiting_message,
-            stage="Обработка текста нейросетью 🤖",
+            stage="Обработка текста нейросетью ✍️🤖\n\nОбычно процесс занимает до 2-х минут. ⚡",
         )
         config_gpt = GPTConfig()
         gpt_client = GPTClient(config_gpt)

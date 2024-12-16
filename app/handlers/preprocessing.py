@@ -96,11 +96,3 @@ async def select_length(callback: CallbackQuery, bot: Bot, state: FSMContext):
             bot, callback.message, error="Произошла ошибка при выборе языка❗️"
         )
         return
-
-
-@router.message(F.text)
-async def any_text(message: Message):
-    await message.reply(
-        "Пожалуйста, нажмите на кнопку 'Сделать конспект' для создания конспекта."
-    )
-    return

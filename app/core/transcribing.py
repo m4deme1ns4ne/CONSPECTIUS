@@ -20,10 +20,15 @@ class AssemblyAIConfig:
                 "ASSEMBLY_AI_API не найден в файле .env или переменных окружения."
             )
         aai.settings.api_key = self._assemblyai_api_key
+        self._speech_model = aai.SpeechModel.nano
 
     @property
     def assemblyai_api_key(self):
         return self._assemblyai_api_key
+
+    @property
+    def speech_model(self):
+        return self._speech_model
 
 
 class AudioToText:
@@ -50,6 +55,7 @@ class AudioToText:
             "punctuate": True,
             # Форматирование текста
             "format_text": True,
+            "speech_model": self.config.speech_model,
         }
 
         # Настройка конфигурации транскрибации с учетом языка
