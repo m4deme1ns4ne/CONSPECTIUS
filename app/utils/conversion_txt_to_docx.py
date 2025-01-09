@@ -26,6 +26,9 @@ class DocumentConfig:
 
     @docx_output_path.setter
     def docx_output_path(self, new_docx_output_path: str):
+        """Сеттер для изменения пути"""
+        if not isinstance(new_docx_output_path, str):
+            raise TypeError("Текст должен быть строкой.")
         self._docx_output_path = new_docx_output_path
 
 

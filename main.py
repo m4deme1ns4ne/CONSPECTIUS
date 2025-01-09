@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from app.core.logger import file_logger
-from app.handlers import (any_text, mainprocessing, payments, preprocessing,
-                          start,)
+from app.handlers import (admin_handlers, any_text, mainprocessing, payments,
+                          preprocessing, start,)
 
 
 @logger.catch
@@ -21,6 +21,7 @@ async def main() -> None:
 
     dp.include_routers(
         start.router,
+        admin_handlers.router,
         preprocessing.router,
         mainprocessing.router,
         payments.router,

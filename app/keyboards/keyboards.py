@@ -2,7 +2,7 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup, WebAppInfo,)
 
 
-URL = "https://f5c9-5-18-188-83.ngrok-free.app"
+URL = ""
 
 
 main_menu = ReplyKeyboardMarkup(

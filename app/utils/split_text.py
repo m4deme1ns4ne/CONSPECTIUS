@@ -15,7 +15,19 @@ class TextSplitter:
         """
         if not isinstance(text, str):
             raise TypeError("Входные данные должны быть строкой.")
-        self.text = text
+        self._text = text
+
+    @property
+    def text(self) -> str:
+        """Геттер для получения текста"""
+        return self._text
+
+    @text.setter
+    def text(self, value: str) -> None:
+        """Сеттер для изменения текста"""
+        if not isinstance(value, str):
+            raise TypeError("Текст должен быть строкой.")
+        self._text = value
 
     def split(self, n_parts: int) -> str:
         """
