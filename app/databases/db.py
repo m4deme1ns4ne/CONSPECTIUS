@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import aiomysql
 from dotenv import load_dotenv

@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 *.pyo
 transcription.txt
+.DS_Store
