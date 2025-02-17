@@ -6,6 +6,7 @@ from loguru import logger
 
 import app.keyboards.keyboards as kb
 import app.templates.cmd_message as cmd
+from app.templates.cmd_message import start_conspect_menu
 from app.templates.send_error_message import send_error_message
 
 
@@ -44,7 +45,7 @@ async def handle_summarize_request(message: Message, state: FSMContext):
     пользователю, как создать конспект.
     """
     await message.answer(
-        "1. Пришлите аудио по первой кнопке 🎧\n2. После этого нажмите на кнопку 'Аудио скинуто'",
+        text=start_conspect_menu,
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True,
         reply_markup=kb.audio_confirmation_menu,

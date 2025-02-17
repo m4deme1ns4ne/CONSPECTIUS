@@ -24,12 +24,8 @@ def get_length_audio(file_path_audio: str) -> str:
 
     if lenght_audio <= 30:
         return "low"
-    if lenght_audio > 30 and lenght_audio <= 60:
-        return "medium"
-    if lenght_audio > 60:
+    else:
         return "high"
-
-    return lenght_audio
 
 
 # Пример использования функции

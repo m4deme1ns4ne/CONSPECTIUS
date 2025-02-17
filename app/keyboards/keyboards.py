@@ -2,7 +2,7 @@ from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup, WebAppInfo,)
 
 
-URL = ""
+URL = "https://tpuz00-5-18-186-83.ru.tuna.am"
 
 
 main_menu = ReplyKeyboardMarkup(
@@ -93,13 +93,7 @@ async def select_length(language: str):
             ],
             [
                 InlineKeyboardButton(
-                    text="📝 Основное содержание",
-                    callback_data=f"medium_{language}",
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="📚 Максимально подробный конспект",
+                    text="📚 Подробный конспект",
                     callback_data=f"high_{language}",
                 )
             ],

@@ -1,13 +1,24 @@
 import os
+from dataclasses import asdict, dataclass
 
 import httpx
 from loguru import logger
 from openai import AsyncOpenAI
 
 from app.errors.empty_text import EmptyTextError
-from app.templates.promts_for_gpt import max_promt, middle_promt, min_promt
+from app.templates.promts_for_gpt import max_promt, min_promt
 from app.utils.count_tokens import count_tokens
-from app.utils.split_text import TextSplitter
+
+
+# from app.utils.split_text import TextSplitter
+
+
+@dataclass
+class Conspect:
+    title: str
+    key_terms_and_concepts: str
+    chronological_lecture_outline: str
+    lenght_conspect: str = "low"
 
 
 class GPTConfig:
@@ -119,56 +130,42 @@ class GPTResponse:
             )
             logger.info("Создан короткий конспект")
 
-        # Средний конспект
-        elif lenght_conspect == "medium":
-            splitter = TextSplitter(text)
-            splitter_text: str = splitter.split(n_parts=2)
-            first_part_conspect: str = await self.gpt_answer(
-                text=splitter_text,
-                model_gpt=model_gpt,
-                promt=middle_promt.first_part,
-            )
-            second_part_conspect: str = await self.gpt_answer(
-                text=splitter_text,
-                model_gpt=model_gpt,
-                promt=middle_promt.second_part,
-            )
-
-            # Получаем итоговый текст
-            conspect: str = f"{first_part_conspect}\n{second_part_conspect}"
-
-            logger.info("Создан подробный конспект")
-
         # Подробный конспект
         else:
-            splitter = TextSplitter(text)
-            splitter_text: str = splitter.split(n_parts=3)
+            # splitter = TextSplitter(text)
+            # splitter_text: str = splitter.split(n_parts=3)
 
             # Получаем части и добавляем их в конспект
-            first_part_conspect: str = await self.gpt_answer(
-                splitter_text, model_gpt, max_promt.beginning_text
+            title: str = await self.gpt_answer(
+                text, model_gpt, max_promt.title
             )
-            second_part_conspect: str = await self.gpt_answer(
-                splitter_text, model_gpt, max_promt.middle_of_the_text
+            key_terms_and_concepts: dict = await self.gpt_answer(
+                text, model_gpt, max_promt.key_terms_and_concepts
             )
-            third_part_conspect: str = await self.gpt_answer(
-                splitter_text, model_gpt, max_promt.end_of_text
+            chronological_lecture_outline: str = await self.gpt_answer(
+                text,
+                model_gpt,
+                max_promt.chronological_lecture_outline,
             )
 
             # Получаем итоговый текст
-            conspect: str = (
-                f"{first_part_conspect}\n{second_part_conspect}\n{third_part_conspect}"
+            conspect: dataclass = Conspect(
+                title=title,
+                key_terms_and_concepts=key_terms_and_concepts,
+                chronological_lecture_outline=chronological_lecture_outline,
+                lenght_conspect=lenght_conspect
             )
 
-            logger.info("Создан очень подробный конспект")
+            logger.info("Создан подробный конспект")
+            try:
+                # Подсчет входных токенов
+                token_count_input = count_tokens(text, model=model_gpt)
+                # Подсчёт выходных токенов
+                token_count_output = sum([count_tokens(value, model=model_gpt) for value in asdict(conspect).values()])
 
-        # Подсчет входных токенов
-        token_count_input = count_tokens(text, model=model_gpt)
-        # Подсчёт выходных токенов
-        token_count_output = count_tokens(conspect, model=model_gpt)
-
-        logger.debug(
-            f"Количество входных токенов: {token_count_input}, Количество выходных токенов: {token_count_output}"
-        )
-
+                logger.debug(
+                    f"Количество входных токенов: {token_count_input}, Количество выходных токенов: {token_count_output}"
+                )
+            except:
+                logger.info("Произошла ошибка при отображении токенов.")
         return conspect

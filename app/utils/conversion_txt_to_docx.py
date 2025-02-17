@@ -1,4 +1,9 @@
+import ast
+from dataclasses import dataclass
+
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from loguru import logger
 
 
 class DocumentConfig:
@@ -51,23 +56,50 @@ class DocumentManager:
     def path_docx(self, file_path: str):
         self._path_docx = file_path
 
-    def txt_to_docx(self, text: str, telegram_id: int) -> None:
+    def txt_to_docx(self, text: dataclass, telegram_id: int, lenght_conspect: str) -> None:
         """Сохраняет текст в файл по определённому пути и изменяет приватный атрибут _path_docx на значение пути нового файла
 
         Args:
-            text (str): Строка, значение которой мы хотим записать в файл
+            text (str): Dataclass, значение которого мы записываем в файл
         """
         # Создаем объект документа
-        document = Document()
+        doc = Document()
+        if lenght_conspect == "low":
+            doc.add_paragraph(text)
+        else:
+            heading = doc.add_heading(text.title, level=0)
+            heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        # Добавляем содержимое переменной в документ
-        document.add_paragraph(text)
+            doc.add_heading("Основные термины и понятия.", level=1)
+            try:
+                for term, value in ast.literal_eval(
+                    text.key_terms_and_concepts
+                ).items():
+                    term = term[0].upper() + term[1:]
+                    paragraph = doc.add_paragraph(style="List Number")
+                    # Добавляем первую часть – жирный и курсивный текст
+                    run1 = paragraph.add_run(term)
+                    run1.bold = True
+                    # Добавляем вторую часть – обычный текст
+                    run2 = paragraph.add_run(f" - {value}")
+                    # doc.add_paragraph(f"{term} - {value}", style="List Number")
+            except Exception as err:
+                doc.add_paragraph("Не получилось красиво оформить термины :(")
+                logger.exception("Не получилось красиво оформить термины")
+                doc.add_paragraph(text.key_terms_and_concepts)
+                print(text.key_terms_and_concepts)
+
+            doc.add_heading("Хронологический конспект лекции.", level=1)
+            doc.add_paragraph(text.chronological_lecture_outline)
+
+            ending = doc.add_paragraph("Made with CONSPECTIUS. Made with love ❤️")
+            ending.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
         # Полный путь к файлу
         file_path: str = self.config.docx_output_path.format(str(telegram_id))
 
         # Сохраняем документ в файл с расширением .docx
-        document.save(file_path)
+        doc.save(file_path)
 
         self.path_docx = file_path
 

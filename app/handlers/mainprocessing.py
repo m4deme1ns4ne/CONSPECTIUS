@@ -75,17 +75,21 @@ async def process_confirmation(
             msg_edit=waiting_message,
             stage="Обработка аудио нейросетью 🎤🤖\n\nОбычно процесс занимает от 3 до 8 минут ⏳",
         )
+        # -------------------------------------------------
         config_transcribing = AssemblyAIConfig()
         audio_to_text = AudioToText(config=config_transcribing)
         transcription = await audio_to_text.transcribing(
             file_path=audio_path, language=language
         )
+        # -------------------------------------------------
+        # with open(
+        #     "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/exaple_trans/transcription.txt",
+        #     "r",
+        # ) as f:
+        #     transcription = f.read()
+        # -------------------------------------------------
         if not transcription:
             raise Exception("Транскрипция не выполнена.")
-        # ----------------------------------------------------------------
-        with open("transcription.txt", "w") as f:
-            f.write(transcription)
-    # ----------------------------------------------------------------
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при расшифровке аудио: {err}")
@@ -142,7 +146,7 @@ async def process_confirmation(
     try:
         doc_config = DocumentConfig()
         doc_manager = DocumentManager(doc_config)
-        doc_manager.txt_to_docx(conspect, telegram_id)
+        doc_manager.txt_to_docx(conspect, telegram_id, lenght_conspect)
         doc_file_path = doc_manager.path_docx
         logger.debug("Файл успешно конвертирован в .docx.")
     except Exception as err:
@@ -177,7 +181,7 @@ async def process_confirmation(
     # Удаление временного файла
     try:
         os.remove(doc_file_path)
-        os.remove(audio_path)
+        # os.remove(audio_path)
         logger.debug("Временный файл успешно удален.")
     except Exception as err:
         logger.error(f"Ошибка при удалении временного файла: {err}")
