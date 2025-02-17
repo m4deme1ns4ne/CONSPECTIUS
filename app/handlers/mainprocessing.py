@@ -7,7 +7,8 @@ from aiogram.types import CallbackQuery, FSInputFile
 from loguru import logger
 
 import app.templates.cmd_message as cmd
-from app.core.handling import GPTClient, GPTConfig, GPTResponse
+from app.core.handling import (ConspectConstructor, GPTClient, GPTConfig,
+                               GPTResponse,)
 from app.core.states import MainState
 from app.core.transcribing import AssemblyAIConfig, AudioToText
 from app.templates.edit_message_stage import edit_message_stage
@@ -128,7 +129,8 @@ async def process_confirmation(
         config_gpt = GPTConfig()
         gpt_client = GPTClient(config_gpt)
         answer_gpt = GPTResponse(gpt_client)
-        conspect = await answer_gpt.processing_conspect(
+        conspect_constructor = ConspectConstructor(answer_gpt)
+        conspect = await conspect_constructor.processing_conspect(
             text=transcription, lenght_conspect=lenght_conspect
         )
         logger.info("Конспект успешно обработан GPT.")

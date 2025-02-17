@@ -56,7 +56,9 @@ class DocumentManager:
     def path_docx(self, file_path: str):
         self._path_docx = file_path
 
-    def txt_to_docx(self, text: dataclass, telegram_id: int, lenght_conspect: str) -> None:
+    def txt_to_docx(
+        self, text: dataclass, telegram_id: int, lenght_conspect: str
+    ) -> None:
         """Сохраняет текст в файл по определённому пути и изменяет приватный атрибут _path_docx на значение пути нового файла
 
         Args:
@@ -83,7 +85,7 @@ class DocumentManager:
                     # Добавляем вторую часть – обычный текст
                     run2 = paragraph.add_run(f" - {value}")
                     # doc.add_paragraph(f"{term} - {value}", style="List Number")
-            except Exception as err:
+            except:
                 doc.add_paragraph("Не получилось красиво оформить термины :(")
                 logger.exception("Не получилось красиво оформить термины")
                 doc.add_paragraph(text.key_terms_and_concepts)
@@ -92,7 +94,9 @@ class DocumentManager:
             doc.add_heading("Хронологический конспект лекции.", level=1)
             doc.add_paragraph(text.chronological_lecture_outline)
 
-            ending = doc.add_paragraph("Made with CONSPECTIUS. Made with love ❤️")
+            ending = doc.add_paragraph(
+                "Made with CONSPECTIUS. Made with love ❤️"
+            )
             ending.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
         # Полный путь к файлу
