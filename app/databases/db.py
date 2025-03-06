@@ -52,7 +52,7 @@ class DatabaseConnection:
                 db=self.config.db,
                 host=self.config.host,
                 port=self.config.port,
-                autocommit=True,  # Убедитесь, что транзакции выполняются автоматически
+                autocommit=True,
             )
         return self._connection
 

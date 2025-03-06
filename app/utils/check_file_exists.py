@@ -43,13 +43,13 @@ class CheckAudioConfig:
 
     def __init__(
         self,
-        audio_upload_path: tuple[str, ...] = None,
+        audio_upload_path: str = None,
         standart_supported_extensions: str = None,
     ):
         """Инициализация конфигурации.
 
         Args:
-            audio_upload_path (tuple[str, ...], optional): Путь к директории для загрузки файлов. Defaults to None.
+            audio_upload_path (str, optional): Путь к директории для загрузки файлов. Defaults to None.
             standart_supported_extensions (str, optional): Расширения, которые поддерживаются для аудиофайлов. Defaults to None.
         """
         self._audio_upload_path = (

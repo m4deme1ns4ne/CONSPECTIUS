@@ -8,6 +8,7 @@ from openai import AsyncOpenAI
 from app.errors.empty_text import EmptyTextError
 from app.templates.promts_for_gpt import max_promt, min_promt
 from app.utils.count_tokens import count_tokens
+from app.utils.part_of_text import get_part_text
 
 
 @dataclass
@@ -15,6 +16,7 @@ class Conspect:
     title: str
     key_terms_and_concepts: str
     chronological_lecture_outline: str
+    mini_test: str
 
 
 class GPTConfig:
@@ -116,12 +118,16 @@ class ConspectConstructor:
 
     async def detailed_conspect(self, text: str, model_gpt: str) -> str:
         # Получаем части и добавляем их в конспект
+
+        # Название (только 30 процентов от текста)
         title: str = await self.gpt_response.gpt_answer(
-            text, model_gpt, max_promt.title
+            get_part_text(text, percent=15), model_gpt, max_promt.title
         )
+        # Термины и понятия
         key_terms_and_concepts: dict = await self.gpt_response.gpt_answer(
             text, model_gpt, max_promt.key_terms_and_concepts
         )
+        # Хронологический конспект лекции
         chronological_lecture_outline: str = (
             await self.gpt_response.gpt_answer(
                 text,
@@ -129,11 +135,18 @@ class ConspectConstructor:
                 max_promt.chronological_lecture_outline,
             )
         )
+        # Небольшой тест лекции
+        mini_test: str = await self.gpt_response.gpt_answer(
+            f"{key_terms_and_concepts}/n/n{chronological_lecture_outline}",
+            model_gpt,
+            max_promt.mini_test,
+        )
         # Получаем итоговый текст
         conspect: dataclass = Conspect(
             title=title,
             key_terms_and_concepts=key_terms_and_concepts,
             chronological_lecture_outline=chronological_lecture_outline,
+            mini_test=mini_test,
         )
 
         logger.info("Создан подробный конспект")
@@ -175,7 +188,7 @@ class ConspectConstructor:
             logger.debug(
                 f"Количество входных токенов: {token_count_input}, Количество выходных токенов: {token_count_output}"
             )
-        except:
-            logger.info("Произошла ошибка при отображении токенов.")
+        except Exception as err:
+            logger.info(f"Произошла ошибка при отображении токенов: {err}")
 
         return conspect

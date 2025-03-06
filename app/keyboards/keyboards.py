@@ -1,14 +1,26 @@
+import os
+
 from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup, WebAppInfo,)
+from dotenv import load_dotenv
 
 
-URL = "https://tpuz00-5-18-186-83.ru.tuna.am"
+load_dotenv()
+
+
+URL = os.getenv("URL", "")
+if not URL:
+    raise ValueError(f"URL пустая: URL = {URL}")
 
 
 main_menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Сделать конспект 📄✨")],
-        [KeyboardButton(text="Подписка 🌟")],
+        [
+            KeyboardButton(text="Подписка 🌟"),
+            KeyboardButton(text="Поддержать проект ❤️"),
+        ],
+        [KeyboardButton(text="Сообщить об ошибке ❗️")],
     ],
     resize_keyboard=True,
 )
@@ -115,5 +127,23 @@ error_report_menu = InlineKeyboardMarkup(
                 text="Сообщить об ошибке", url="https://t.me/+HjWqmBJSRxk2YmNi"
             )
         ]
+    ]
+)
+
+
+donate_url = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="Единоразовый донат",
+                url="https://pay.cloudtips.ru/p/ecc9c8ca",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="Регулярный платеж",
+                url="https://t.me/tribute/app?startapp=sq4G",
+            )
+        ],
     ]
 )

@@ -3,7 +3,7 @@ from .conversion_txt_to_docx import DocumentConfig, DocumentManager
 from .convert_seconds import convert_seconds
 from .count_tokens import count_tokens
 from .get_length_audio import get_length_audio
-from .split_text import TextSplitter
+from .part_of_text import get_part_text
 
 
 __all__ = [
@@ -13,6 +13,6 @@ __all__ = [
     "DocumentManager",
     "convert_seconds",
     "count_tokens",
-    "TextSplitter",
     "get_length_audio",
+    "get_part_text",
 ]

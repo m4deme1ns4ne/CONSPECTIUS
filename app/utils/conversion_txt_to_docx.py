@@ -84,15 +84,19 @@ class DocumentManager:
                     run1.bold = True
                     # Добавляем вторую часть – обычный текст
                     run2 = paragraph.add_run(f" - {value}")
-                    # doc.add_paragraph(f"{term} - {value}", style="List Number")
-            except:
+            except Exception as err:
                 doc.add_paragraph("Не получилось красиво оформить термины :(")
-                logger.exception("Не получилось красиво оформить термины")
+                logger.exception(
+                    f"Не получилось красиво оформить термины: {err}"
+                )
                 doc.add_paragraph(text.key_terms_and_concepts)
                 print(text.key_terms_and_concepts)
 
             doc.add_heading("Хронологический конспект лекции.", level=1)
             doc.add_paragraph(text.chronological_lecture_outline)
+
+            doc.add_heading("Тест для понимая лекции", level=1)
+            doc.add_paragraph(text.mini_test)
 
             ending = doc.add_paragraph(
                 "Made with CONSPECTIUS. Made with love ❤️"

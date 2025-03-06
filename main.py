@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from app.core.logger import file_logger
-from app.handlers import (admin_handlers, any_text, mainprocessing, payments,
-                          preprocessing, start,)
+from app.handlers import (admin_handlers, any_text, donate, errors_send,
+                          mainprocessing, payments, preprocessing, start,)
 
 
 @logger.catch
@@ -16,11 +16,13 @@ async def main() -> None:
     load_dotenv()
     file_logger()
 
-    bot = Bot(token=os.getenv("BOT_TOKEN"))
+    bot = Bot(token=os.getenv("TELEGRAM_BOT_TOKEN"))
     dp = Dispatcher()
 
     dp.include_routers(
         start.router,
+        donate.router,
+        errors_send.router,
         admin_handlers.router,
         preprocessing.router,
         mainprocessing.router,
