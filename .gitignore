@@ -3,5 +3,5 @@ debug.log
 __pycache__/
 *.pyc
 *.pyo
-transcription.txt
+example_trans/
 .DS_Store
