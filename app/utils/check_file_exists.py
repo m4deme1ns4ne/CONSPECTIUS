@@ -38,7 +38,7 @@ class CheckAudioConfig:
         ".wv",
     )
     standard_audio_upload_path = (
-        "/Users/aleksandrvolzanin/pet_project/site_conspectius/uploads/{}"
+        "/CONSPECTIUS/shared_audio/{}"
     )
 
     def __init__(

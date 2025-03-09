@@ -4,6 +4,9 @@ WORKDIR /CONSPECTIUS
 
 ENV PYTHONUNBUFFERED=1
 
+# В Dockerfile conspectius (после установки Poetry)
+RUN apt-get update && apt-get install -y ffmpeg
+
 # Установка Poetry
 RUN pip install poetry==1.8.2
     
@@ -18,3 +21,5 @@ RUN poetry config virtualenvs.create false && \
 COPY . .
 
 CMD ["poetry", "run", "python3.12", "main.py"]
+
+# docker build --no-cache . -t conspectius && docker run conspectius

@@ -1,0 +1,17 @@
+services:
+  # Контейнер 1 (телеграмм бот)
+  conspectius:
+    build: . # Собирает из ТЕКУЩЕЙ папки (CONSPECTIUS/)
+    volumes:
+      - shared_audio:/CONSPECTIUS/shared_audio
+
+  # Контейнер 2 (веб-сервер)
+  site_conspectius:
+    build: ../site_conspectius # Путь ОТНОСИТЕЛЬНО папки CONSPECTIUS/
+    volumes:
+      - shared_audio:/SITE_CONSPECTIUS/shared_audio
+    ports:
+      - "8000:8000"
+
+volumes:
+  shared_audio:

@@ -22,7 +22,7 @@ class DocumentConfig:
         """
         self._docx_output_path = (
             docx_output_path
-            or "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/app/received_txt/{}.docx"
+            or "/CONSPECTIUS/app/received_txt/{}.docx"
         )
 
     @property
