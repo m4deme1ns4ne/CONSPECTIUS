@@ -21,8 +21,7 @@ class DocumentConfig:
             docx_output_path (str | None): Пользовательский путь для сохранения .docx файлов.
         """
         self._docx_output_path = (
-            docx_output_path
-            or "/CONSPECTIUS/app/received_txt/{}.docx"
+            docx_output_path or "/CONSPECTIUS/app/received_txt/{}.docx"
         )
 
     @property

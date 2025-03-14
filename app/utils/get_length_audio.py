@@ -4,7 +4,7 @@ from pydub import AudioSegment
 
 
 # Подавление всех предупреждений
-warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
 def get_length_audio(file_path_audio: str) -> str:

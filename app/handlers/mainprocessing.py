@@ -1,9 +1,10 @@
 import os
 
+import httpx
 from aiogram import Bot, Router
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaDocument
 from loguru import logger
 
 import app.templates.cmd_message as cmd
@@ -76,21 +77,19 @@ async def process_confirmation(
             msg_edit=waiting_message,
             stage="Обработка аудио нейросетью 🎤🤖\n\nОбычно процесс занимает от 3 до 8 минут ⏳",
         )
-        # -------------------------------------------------
+        # ------------------------------------------------- <- Этот кусок кода скидывает текст на транскрибаци, обычно это долго
+        #                                                      поэтому, чтобы протестировать другие функции, можно просто прочитать файл,
+        #                                                      чтобы не ждать долгую трансрибацию.
+
+        #                                                      В будущем его не будет, так как будут написаны нормальные тесты(надеюсь).
         config_transcribing = AssemblyAIConfig()
         audio_to_text = AudioToText(config=config_transcribing)
         transcription = await audio_to_text.transcribing(
             file_path=audio_path, language=language
         )
-        # -------------------------------------------------
-        # with open(
-        #     "/Users/aleksandrvolzanin/pet_project/CONSPECTIUS/exaple_trans/transcription.txt",
-        #     "r",
-        # ) as f:
-        #     transcription = f.read()
-        # -------------------------------------------------
         if not transcription:
             raise Exception("Транскрипция не выполнена.")
+        print(transcription)
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при расшифровке аудио: {err}")
@@ -104,8 +103,8 @@ async def process_confirmation(
     # Если пользователь не знает желаемую длину конспекта, то происходит определение длины аудио
     # А если пользователь знает желаемую длину конспекта, то остаётся изначальная переменная lenght_conspect
 
+    # Определение длины аудио сообщения
     if lenght_conspect == "cancellength":
-        # Определение длины аудио сообщения
         try:
             lenght_conspect = get_length_audio(file_path_audio=audio_path)
             logger.info(f"Длина аудио успешно определена {lenght_conspect}")
@@ -134,6 +133,9 @@ async def process_confirmation(
             text=transcription, lenght_conspect=lenght_conspect
         )
         logger.info("Конспект успешно обработан GPT.")
+    except httpx.ProxyError as err:
+        logger.error(f"Прокси-ошибка: {err}")
+        raise Exception
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при обработке конспекта: {err}")
@@ -164,12 +166,18 @@ async def process_confirmation(
     # Отправка файла пользователю
     try:
         input_file = FSInputFile(doc_file_path)
-        await edit_message_stage(
-            bot, msg_edit=waiting_message, text="Ваш конспект ☺️"
+        await bot.edit_message_media(
+            chat_id=waiting_message.chat.id,
+            message_id=waiting_message.message_id,
+            media=InputMediaDocument(
+                media=input_file,
+                caption="☝️🤓 Ваш конспект\n\n🤖 Нравится бот? Расскажи про него другим:\nhttps://t.me/CONSPECTIUS_bot",
+            ),
         )
-        await callback.message.answer_document(input_file)
         await state.clear()
         logger.debug("Файл успешно отправлен пользователю.")
+    except FileNotFoundError as err:
+        logger.error(f"Файл не найден для переименования: {err}")
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при отправке файла: {err}")
@@ -183,7 +191,6 @@ async def process_confirmation(
     # Удаление временного файла
     try:
         os.remove(doc_file_path)
-        # os.remove(audio_path)
         logger.debug("Временный файл успешно удален.")
     except Exception as err:
         logger.error(f"Ошибка при удалении временного файла: {err}")

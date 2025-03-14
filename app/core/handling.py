@@ -1,14 +1,12 @@
 import os
 from dataclasses import asdict, dataclass
-
 import httpx
 from loguru import logger
 from openai import AsyncOpenAI
 
 from app.errors.empty_text import EmptyTextError
 from app.templates.promts_for_gpt import max_promt, min_promt
-from app.utils.count_tokens import count_tokens
-from app.utils.part_of_text import get_part_text
+from app.utils import count_tokens, get_part_text, remove_markdown
 
 
 @dataclass
@@ -56,12 +54,7 @@ class GPTClient:
         """
         return AsyncOpenAI(
             api_key=self.config._gpt_api_key,
-            http_client=httpx.AsyncClient(
-                proxies=self.config._proxies,
-                transport=httpx.HTTPTransport(
-                    local_address=self.config._proxies
-                ),
-            ),
+            base_url="https://openrouter.ai/api/v1",
         )
 
 
@@ -91,6 +84,7 @@ class GPTResponse:
 
         # Отправляем запрос в GPT
         response = await client.chat.completions.create(
+            extra_body={},
             model=model_gpt,
             messages=[
                 {"role": "system", "content": str(promt)},
@@ -112,7 +106,9 @@ class ConspectConstructor:
         self.gpt_response: GPTResponse = gpt_response
 
     async def short_conspect(self, text: str, model_gpt: str) -> str:
-        conspect = await self.gpt_answer(text, model_gpt, min_promt.whole_part)
+        conspect = await self.gpt_response.gpt_answer(
+            text, model_gpt, min_promt.whole_part
+        )
         logger.info("Создан короткий конспект")
         return conspect
 
@@ -143,10 +139,12 @@ class ConspectConstructor:
         )
         # Получаем итоговый текст
         conspect: dataclass = Conspect(
-            title=title,
-            key_terms_and_concepts=key_terms_and_concepts,
-            chronological_lecture_outline=chronological_lecture_outline,
-            mini_test=mini_test,
+            title=remove_markdown(title),
+            key_terms_and_concepts=remove_markdown(key_terms_and_concepts),
+            chronological_lecture_outline=remove_markdown(
+                chronological_lecture_outline
+            ),
+            mini_test=remove_markdown(mini_test),
         )
 
         logger.info("Создан подробный конспект")
@@ -164,7 +162,9 @@ class ConspectConstructor:
         Returns:
             str: Конечный конспект
         """
-        model_gpt: str = "gpt-4o-mini"
+        model_gpt: str = "deepseek/deepseek-r1:free"
+
+        logger.debug("Начало обработки текста")
 
         # Короткий конспект
         if lenght_conspect == "low":
@@ -185,10 +185,10 @@ class ConspectConstructor:
                 ]
             )
 
-            logger.debug(
+            logger.info(
                 f"Количество входных токенов: {token_count_input}, Количество выходных токенов: {token_count_output}"
             )
         except Exception as err:
-            logger.info(f"Произошла ошибка при отображении токенов: {err}")
+            logger.error(f"Произошла ошибка при отображении токенов: {err}")
 
         return conspect

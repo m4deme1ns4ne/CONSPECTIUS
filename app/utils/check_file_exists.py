@@ -37,9 +37,7 @@ class CheckAudioConfig:
         ".wma",
         ".wv",
     )
-    standard_audio_upload_path = (
-        "/CONSPECTIUS/shared_audio/{}"
-    )
+    standard_audio_upload_path = "/CONSPECTIUS/shared_audio/{}"
 
     def __init__(
         self,

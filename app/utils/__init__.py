@@ -4,6 +4,7 @@ from .convert_seconds import convert_seconds
 from .count_tokens import count_tokens
 from .get_length_audio import get_length_audio
 from .part_of_text import get_part_text
+from .remove_markdown import remove_markdown
 
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "count_tokens",
     "get_length_audio",
     "get_part_text",
+    "remove_markdown",
 ]

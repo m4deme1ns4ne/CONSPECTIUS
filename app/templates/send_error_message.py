@@ -25,6 +25,6 @@ async def send_error_message(
     await bot.edit_message_text(
         chat_id=msg_edit.chat.id,
         message_id=msg_edit.message_id,
-        text=f"Произошла ошибка при обработке вашего аудио. ⚠️\n\n{error}\n\n{message_to_user}",
+        text=f"Произошла ошибка при обработке вашего аудио. ⚠️\n\n{error}\n{message_to_user}",
         reply_markup=kb.error_report_menu,
     )

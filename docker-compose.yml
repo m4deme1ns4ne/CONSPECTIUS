@@ -4,6 +4,8 @@ services:
     build: . # Собирает из ТЕКУЩЕЙ папки (CONSPECTIUS/)
     volumes:
       - shared_audio:/CONSPECTIUS/shared_audio
+    env_file:
+      - .env
 
   # Контейнер 2 (веб-сервер)
   site_conspectius:
