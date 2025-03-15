@@ -5,7 +5,6 @@ __pycache__/
 *.pyd
 .Python
 README.md
-example/
 debug.log
 .DS_Store
 .black

@@ -1,6 +1,6 @@
 import os
 from dataclasses import asdict, dataclass
-import httpx
+
 from loguru import logger
 from openai import AsyncOpenAI
 
@@ -27,7 +27,7 @@ class GPTConfig:
                 "OPENAI_API_KEY не найден в файле .env или переменных окружения."
             )
         # Прокси опционально
-        self._proxies: str = os.getenv("PROXY", "")
+        # self._proxies: str = os.getenv("PROXY", "")
 
     @property
     def gpt_api_key(self):
@@ -54,7 +54,7 @@ class GPTClient:
         """
         return AsyncOpenAI(
             api_key=self.config._gpt_api_key,
-            base_url="https://openrouter.ai/api/v1",
+            base_url="https://openrouter.ai/api/v1"
         )
 
 
@@ -119,10 +119,22 @@ class ConspectConstructor:
         title: str = await self.gpt_response.gpt_answer(
             get_part_text(text, percent=15), model_gpt, max_promt.title
         )
+        if title is not None:
+            logger.debug(f"Создано название для подробного конспекта: type({type(title)})")
+        else:
+            raise EmptyTextError("Название для подробного конспекта пустое")
+
         # Термины и понятия
         key_terms_and_concepts: dict = await self.gpt_response.gpt_answer(
             text, model_gpt, max_promt.key_terms_and_concepts
         )
+        if key_terms_and_concepts is not None:
+            logger.debug(f"Созданы термины и понятия для подробного конспекта: type({type(key_terms_and_concepts)})")
+        else:
+            raise EmptyTextError(
+                "Термины и понятия для подробного конспекта пустые"
+            )
+
         # Хронологический конспект лекции
         chronological_lecture_outline: str = (
             await self.gpt_response.gpt_answer(
@@ -131,12 +143,30 @@ class ConspectConstructor:
                 max_promt.chronological_lecture_outline,
             )
         )
+        if chronological_lecture_outline is not None:
+            logger.debug(
+                f"Создано хронологический конспект лекции для подробного конспекта: type({type(chronological_lecture_outline)})"
+            )
+        else:
+            raise EmptyTextError(
+                "Хронологический конспект лекции для подробного конспекта пустой"
+            )
+
         # Небольшой тест лекции
         mini_test: str = await self.gpt_response.gpt_answer(
             f"{key_terms_and_concepts}/n/n{chronological_lecture_outline}",
             model_gpt,
             max_promt.mini_test,
         )
+        if mini_test is not None:
+            logger.debug(
+                f"Создано небольшой тест лекции для подробного конспекта: type({type(mini_test)})"
+            )
+        else:
+            raise EmptyTextError(
+                "Небольшой тест лекции для подробного конспекта пустой"
+            )
+
         # Получаем итоговый текст
         conspect: dataclass = Conspect(
             title=remove_markdown(title),

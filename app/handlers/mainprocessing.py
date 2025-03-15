@@ -82,14 +82,18 @@ async def process_confirmation(
         #                                                      чтобы не ждать долгую трансрибацию.
 
         #                                                      В будущем его не будет, так как будут написаны нормальные тесты(надеюсь).
-        config_transcribing = AssemblyAIConfig()
-        audio_to_text = AudioToText(config=config_transcribing)
-        transcription = await audio_to_text.transcribing(
-            file_path=audio_path, language=language
-        )
-        if not transcription:
-            raise Exception("Транскрипция не выполнена.")
-        print(transcription)
+        # -------------------------------------------------
+        # config_transcribing = AssemblyAIConfig()
+        # audio_to_text = AudioToText(config=config_transcribing)
+        # transcription = await audio_to_text.transcribing(
+        #     file_path=audio_path, language=language
+        # )
+        # if not transcription:
+        #     raise Exception("Транскрипция не выполнена.")
+        # -------------------------------------------------
+        with open("/CONSPECTIUS/example/text.txt", "r") as file:
+            transcription = file.read()
+        # -------------------------------------------------
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при расшифровке аудио: {err}")
