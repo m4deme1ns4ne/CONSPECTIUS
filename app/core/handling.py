@@ -11,10 +11,11 @@ from app.utils import count_tokens, get_part_text, remove_markdown
 
 @dataclass
 class Conspect:
-    title: str
-    key_terms_and_concepts: str
-    chronological_lecture_outline: str
-    mini_test: str
+    title: str = None
+    key_terms_and_concepts: str = None
+    chronological_lecture_outline: str = None
+    mini_test: str = None
+    summary: str = None
 
 
 class GPTConfig:
@@ -106,10 +107,33 @@ class ConspectConstructor:
         self.gpt_response: GPTResponse = gpt_response
 
     async def short_conspect(self, text: str, model_gpt: str) -> str:
-        conspect = await self.gpt_response.gpt_answer(
-            text, model_gpt, min_promt.whole_part
+        # Саммари текста
+        summary: dict = await self.gpt_response.gpt_answer(
+            text, model_gpt, min_promt.summary
+        )
+        if summary is not None:
+            logger.debug(
+                f"Создано саммари для короткого конспекта: type({type(summary)})"
+            )
+        else:
+            raise EmptyTextError("Саммари для короткого конспекта пустое")
+
+        # Название, создается на основе summary
+        title: str = await self.gpt_response.gpt_answer(
+            summary, model_gpt, min_promt.title
+        )
+        if title is not None:
+            logger.debug(
+                f"Создано название для короткого конспекта: type({type(title)})"
+            )
+        else:
+            raise EmptyTextError("Название для короткого конспекта пустое")
+
+        conspect: dataclass = Conspect(
+            title=remove_markdown(title), summary=remove_markdown(summary)
         )
         logger.info("Создан короткий конспект")
+
         return conspect
 
     async def detailed_conspect(self, text: str, model_gpt: str) -> str:
@@ -216,6 +240,7 @@ class ConspectConstructor:
                 [
                     count_tokens(value, model=model_gpt)
                     for value in asdict(conspect).values()
+                    if value is not None
                 ]
             )
 

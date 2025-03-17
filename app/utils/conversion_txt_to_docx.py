@@ -71,12 +71,11 @@ class DocumentManager:
 
         # Создаем объект документа
         doc = Document()
+        heading = doc.add_heading(text.title, level=0)
+        heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
         if lenght_conspect == "low":
-            doc.add_paragraph(text)
+            doc.add_paragraph(text.summary)
         else:
-            heading = doc.add_heading(text.title, level=0)
-            heading.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
             doc.add_heading("Основные термины и понятия.", level=1)
             try:
                 for term, value in ast.literal_eval(

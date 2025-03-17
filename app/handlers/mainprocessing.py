@@ -12,12 +12,12 @@ from app.core.handling import (ConspectConstructor, GPTClient, GPTConfig,
                                GPTResponse,)
 from app.core.states import MainState
 from app.core.transcribing import AssemblyAIConfig, AudioToText
+from app.errors.empty_text import EmptyTextError
 from app.templates.edit_message_stage import edit_message_stage
 from app.templates.send_error_message import send_error_message
 from app.utils.check_file_exists import AudioManager, CheckAudioConfig
 from app.utils.conversion_txt_to_docx import DocumentConfig, DocumentManager
 from app.utils.get_length_audio import get_length_audio
-from app.errors.empty_text import EmptyTextError
 
 
 router = Router()
@@ -65,7 +65,9 @@ async def process_confirmation(
         logger.debug(f"Аудио найдено: {audio_path}")
     except FileNotFoundError as err:
         logger.error(f"Файл не найден: {err}")
-        raise Exception(f"Файл не найден для транскрибирования: {err}") from err
+        raise Exception(
+            f"Файл не найден для транскрибирования: {err}"
+        ) from err
     except Exception as err:
         logger.error(f"Ошибка при проверке на наличие аудио: {err}")
         await send_error_message(
@@ -98,10 +100,14 @@ async def process_confirmation(
             transcription = file.read()
         # -------------------------------------------------
         if not transcription:
-            raise EmptyTextError(f"Текст после транскрибации пуст: type{type(transcription)}")
+            raise EmptyTextError(
+                f"Текст после транскрибации пуст: type{type(transcription)}"
+            )
     except FileNotFoundError as err:
         logger.error(f"Файл не найден: {err}")
-        raise Exception(f"Файл не найден для распознования аудио: {err}") from err
+        raise Exception(
+            f"Файл не найден для распознования аудио: {err}"
+        ) from err
     except EmptyTextError as err:
         logger.error(f"Транскрибация пустая: {err}")
         raise Exception(f"Текст после транскрибации пустой: {err}") from err
@@ -151,8 +157,10 @@ async def process_confirmation(
         )
         logger.info("Конспект успешно обработан GPT.")
     except httpx.ProxyError as err:
-        logger.error(f"Прокси-ошибка: {err}") 
-        raise Exception(f"Ошибка связанная с прокси при обработке: {err}") from err
+        logger.error(f"Прокси-ошибка: {err}")
+        raise Exception(
+            f"Ошибка связанная с прокси при обработке: {err}"
+        ) from err
     except Exception as err:
         logger.error(f"Ошибка при обработке конспекта: {err}")
         await send_error_message(
@@ -177,7 +185,9 @@ async def process_confirmation(
         logger.debug("Файл успешно конвертирован в .docx.")
     except FileNotFoundError as err:
         logger.error(f"Файл не найден: {err}")
-        raise Exception(f"Не найден файл при конвертации текста в .docx: {err}") from err
+        raise Exception(
+            f"Не найден файл при конвертации текста в .docx: {err}"
+        ) from err
     except Exception as err:
         logger.error(f"Ошибка при конвертации файла: {err}")
         await send_error_message(
@@ -192,8 +202,12 @@ async def process_confirmation(
     # Переименовываем файл
     try:
         if not os.path.exists(doc_file_path):
-            raise FileNotFoundError(f"Исходный файл {doc_file_path} не найден для переименования")
-        new_file_path = os.path.join(os.path.dirname(doc_file_path), f"{conspect.title}.docx")
+            raise FileNotFoundError(
+                f"Исходный файл {doc_file_path} не найден для переименования"
+            )
+        new_file_path = os.path.join(
+            os.path.dirname(doc_file_path), f"{conspect.title}.docx"
+        )
         os.rename(doc_file_path, new_file_path)
         doc_file_path = new_file_path
     except FileNotFoundError as err:
