@@ -55,21 +55,27 @@ async def process_confirmation(
     lenght_conspect = data_parts[0]
     language = data_parts[1]
 
-    logger.info(f"Язык: {language}, длина конспекта: {lenght_conspect}")
+    logger.info(
+        f"Пользователь: {telegram_id}; Язык: {language}, длина конспекта: {lenght_conspect}"
+    )
 
     # Проверка наличия аудиофайла
     try:
         check_audio_config = CheckAudioConfig()
         audio_manager = AudioManager(config=check_audio_config)
         audio_path = audio_manager.check_audio_file(telegram_id)
-        logger.debug(f"Аудио найдено: {audio_path}")
+        logger.debug(
+            f"Пользователь: {telegram_id}; Аудио найдено: {audio_path}"
+        )
     except FileNotFoundError as err:
-        logger.error(f"Файл не найден: {err}")
+        logger.error(f"Пользователь: {telegram_id}; Файл не найден: {err}")
         raise Exception(
-            f"Файл не найден для транскрибирования: {err}"
+            f"Пользователь: {telegram_id}; Файл не найден для транскрибирования: {err}"
         ) from err
     except Exception as err:
-        logger.error(f"Ошибка при проверке на наличие аудио: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка при проверке на наличие аудио: {err}"
+        )
         await send_error_message(
             bot, msg_edit=waiting_message, error="Файл не найден❗️"
         )
@@ -104,15 +110,21 @@ async def process_confirmation(
                 f"Текст после транскрибации пуст: type{type(transcription)}"
             )
     except FileNotFoundError as err:
-        logger.error(f"Файл не найден: {err}")
+        logger.error(f"Пользователь: {telegram_id}; Файл не найден: {err}")
         raise Exception(
-            f"Файл не найден для распознования аудио: {err}"
+            f"Пользователь: {telegram_id}; Файл не найден для распознования аудио: {err}"
         ) from err
     except EmptyTextError as err:
-        logger.error(f"Транскрибация пустая: {err}")
-        raise Exception(f"Текст после транскрибации пустой: {err}") from err
+        logger.error(
+            f"Пользователь: {telegram_id}; Транскрибация пустая: {err}"
+        )
+        raise Exception(
+            f"Пользователь: {telegram_id}; Текст после транскрибации пустой: {err}"
+        ) from err
     except Exception as err:
-        logger.error(f"Ошибка при расшифровке аудио: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка при расшифровке аудио: {err}"
+        )
         await send_error_message(
             bot,
             waiting_message,
@@ -129,9 +141,13 @@ async def process_confirmation(
     if lenght_conspect == "cancellength":
         try:
             lenght_conspect = get_length_audio(file_path_audio=audio_path)
-            logger.info(f"Длина аудио успешно определена {lenght_conspect}")
+            logger.info(
+                f"Пользователь: {telegram_id}; Длина аудио успешно определена {lenght_conspect}"
+            )
         except Exception as err:
-            logger.error(f"Ошибка при определении длины аудио: {err}")
+            logger.error(
+                f"Пользователь: {telegram_id}; Ошибка при определении длины аудио: {err}"
+            )
             await send_error_message(
                 bot,
                 waiting_message,
@@ -155,14 +171,18 @@ async def process_confirmation(
         conspect = await conspect_constructor.processing_conspect(
             text=transcription, lenght_conspect=lenght_conspect
         )
-        logger.info("Конспект успешно обработан GPT.")
+        logger.info(
+            f"Пользователь: {telegram_id}; Конспект успешно обработан GPT."
+        )
     except httpx.ProxyError as err:
-        logger.error(f"Прокси-ошибка: {err}")
+        logger.error(f"Пользователь: {telegram_id}; Прокси-ошибка: {err}")
         raise Exception(
-            f"Ошибка связанная с прокси при обработке: {err}"
+            f"Пользователь: {telegram_id}; Ошибка связанная с прокси при обработке: {err}"
         ) from err
     except Exception as err:
-        logger.error(f"Ошибка при обработке конспекта: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка при обработке конспекта: {err}"
+        )
         await send_error_message(
             bot,
             waiting_message,
@@ -182,14 +202,18 @@ async def process_confirmation(
             new_file_title=conspect.title,
         )
         doc_file_path = doc_manager.path_docx
-        logger.debug("Файл успешно конвертирован в .docx.")
+        logger.debug(
+            f"Пользователь: {telegram_id}; Файл успешно конвертирован в .docx."
+        )
     except FileNotFoundError as err:
-        logger.error(f"Файл не найден: {err}")
+        logger.error(f"Пользователь: {telegram_id}; Файл не найден: {err}")
         raise Exception(
-            f"Не найден файл при конвертации текста в .docx: {err}"
+            f"Пользователь: {telegram_id}; Не найден файл при конвертации текста в .docx: {err}"
         ) from err
     except Exception as err:
-        logger.error(f"Ошибка при конвертации файла: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка при конвертации файла: {err}"
+        )
         await send_error_message(
             bot,
             waiting_message,
@@ -211,10 +235,14 @@ async def process_confirmation(
         os.rename(doc_file_path, new_file_path)
         doc_file_path = new_file_path
     except FileNotFoundError as err:
-        logger.error(f"Файл не найден: {err}")
-        raise Exception(f"Не найден файл при переименовывание: {err}") from err
+        logger.error(f"Пользователь: {telegram_id}; Файл не найден: {err}")
+        raise Exception(
+            f"Пользователь: {telegram_id}; Не найден файл при переименовывание: {err}"
+        ) from err
     except Exception as err:
-        logger.error(f"Ошибка переименовывания файла: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка переименовывания файла: {err}"
+        )
         await send_error_message(
             bot,
             waiting_message,
@@ -235,12 +263,18 @@ async def process_confirmation(
                 caption="☝️🤓 Ваш конспект\n\n🤖 Нравится бот? Расскажи про него другим:\nhttps://t.me/CONSPECTIUS_bot",
             ),
         )
-        logger.debug("Файл успешно отправлен пользователю.")
+        logger.debug(
+            f"Пользователь: {telegram_id}; Файл успешно отправлен пользователю."
+        )
     except FileNotFoundError as err:
-        raise Exception(f"Файл не найден для отравки: {err}") from err
+        raise Exception(
+            f"Пользователь: {telegram_id}; Файл не найден для отравки: {err}"
+        ) from err
     except Exception as err:
         await state.clear()
-        logger.error(f"Ошибка при отправке файла: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка при отправке файла: {err}"
+        )
         await send_error_message(
             bot,
             waiting_message,
@@ -250,12 +284,34 @@ async def process_confirmation(
     finally:
         await state.clear()
 
-    # Удаление временного файла
+    # Удаление временного файла docx
     try:
         os.remove(doc_file_path)
-        logger.debug("Временный файл успешно удален.")
+        logger.debug(
+            f"Пользователь: {telegram_id}; Временный файл успешно удален."
+        )
     except FileNotFoundError as err:
-        logger.error(f"Файл не найден: {err}")
-        raise Exception(f"Не найден файл при удалении: {err}") from err
+        logger.error(f"Пользователь: {telegram_id}; Временный файл не найден: {err}")
+        raise Exception(
+            f"Пользователь: {telegram_id}; Не найден временный файл при удалении: {err}"
+        ) from err
     except Exception as err:
-        logger.error(f"Ошибка при удалении временного файла: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка при удалении временного файла: {err}"
+        )
+
+    # Удаление аудиофайла файла
+    try:
+        os.remove(audio_path)
+        logger.debug(
+            f"Пользователь: {telegram_id}; Аудиофайл успешно удален."
+        )
+    except FileNotFoundError as err:
+        logger.error(f"Пользователь: {telegram_id}; Аудиофайл не найден: {err}")
+        raise Exception(
+            f"Пользователь: {telegram_id}; Не найден аудиофайл при удалении: {err}"
+        ) from err
+    except Exception as err:
+        logger.error(
+            f"Пользователь: {telegram_id}; Ошибка при удалении аудиофайла: {err}"
+        )
