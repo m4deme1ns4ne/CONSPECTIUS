@@ -9,7 +9,7 @@ from loguru import logger
 
 import app.templates.cmd_message as cmd
 from app.core.handling import (ConspectConstructor, GPTClient, GPTConfig,
-                               GPTResponse,)
+                               GPTResponse)
 from app.core.states import MainState
 from app.core.transcribing import AssemblyAIConfig, AudioToText
 from app.errors.empty_text import EmptyTextError

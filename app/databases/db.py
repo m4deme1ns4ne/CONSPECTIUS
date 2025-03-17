@@ -11,7 +11,7 @@ class DatabaseConfig:
         load_dotenv()
         self._user = os.getenv("DB_USER", "root")
         self._db = os.getenv("DB_NAME", "conspectius")
-        self._host = os.getenv("DB_HOST", "localhost")
+        self._host = os.getenv("DB_HOST", "127.0.0.1")
         self._port = os.getenv("DB_PORT", 3306)
 
         # Бросаем исключение, если конфигурация отсутствует
