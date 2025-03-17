@@ -54,7 +54,7 @@ class GPTClient:
         """
         return AsyncOpenAI(
             api_key=self.config._gpt_api_key,
-            base_url="https://openrouter.ai/api/v1"
+            base_url="https://openrouter.ai/api/v1",
         )
 
 
@@ -120,7 +120,9 @@ class ConspectConstructor:
             get_part_text(text, percent=15), model_gpt, max_promt.title
         )
         if title is not None:
-            logger.debug(f"Создано название для подробного конспекта: type({type(title)})")
+            logger.debug(
+                f"Создано название для подробного конспекта: type({type(title)})"
+            )
         else:
             raise EmptyTextError("Название для подробного конспекта пустое")
 
@@ -129,7 +131,9 @@ class ConspectConstructor:
             text, model_gpt, max_promt.key_terms_and_concepts
         )
         if key_terms_and_concepts is not None:
-            logger.debug(f"Созданы термины и понятия для подробного конспекта: type({type(key_terms_and_concepts)})")
+            logger.debug(
+                f"Созданы термины и понятия для подробного конспекта: type({type(key_terms_and_concepts)})"
+            )
         else:
             raise EmptyTextError(
                 "Термины и понятия для подробного конспекта пустые"

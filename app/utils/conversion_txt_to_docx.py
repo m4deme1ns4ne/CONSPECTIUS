@@ -56,13 +56,19 @@ class DocumentManager:
         self._path_docx = file_path
 
     def txt_to_docx(
-        self, text: dataclass, telegram_id: int, lenght_conspect: str
+        self,
+        text: dataclass,
+        lenght_conspect: str,
+        telegram_id: int = None,
+        new_file_title: int = None,
     ) -> None:
         """Сохраняет текст в файл по определённому пути и изменяет приватный атрибут _path_docx на значение пути нового файла
 
         Args:
             text (str): Dataclass, значение которого мы записываем в файл
         """
+        title = str(telegram_id) if telegram_id is not None else new_file_title
+
         # Создаем объект документа
         doc = Document()
         if lenght_conspect == "low":
@@ -103,7 +109,7 @@ class DocumentManager:
             ending.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
         # Полный путь к файлу
-        file_path: str = self.config.docx_output_path.format(str(telegram_id))
+        file_path: str = self.config.docx_output_path.format(title)
 
         # Сохраняем документ в файл с расширением .docx
         doc.save(file_path)

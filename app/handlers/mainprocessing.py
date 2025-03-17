@@ -17,6 +17,7 @@ from app.templates.send_error_message import send_error_message
 from app.utils.check_file_exists import AudioManager, CheckAudioConfig
 from app.utils.conversion_txt_to_docx import DocumentConfig, DocumentManager
 from app.utils.get_length_audio import get_length_audio
+from app.errors.empty_text import EmptyTextError
 
 
 router = Router()
@@ -62,13 +63,17 @@ async def process_confirmation(
         audio_manager = AudioManager(config=check_audio_config)
         audio_path = audio_manager.check_audio_file(telegram_id)
         logger.debug(f"Аудио найдено: {audio_path}")
-    except Exception as err:
-        await state.clear()
+    except FileNotFoundError as err:
         logger.error(f"Файл не найден: {err}")
+        raise Exception(f"Файл не найден для транскрибирования: {err}") from err
+    except Exception as err:
+        logger.error(f"Ошибка при проверке на наличие аудио: {err}")
         await send_error_message(
             bot, msg_edit=waiting_message, error="Файл не найден❗️"
         )
         return
+    finally:
+        await state.clear()
 
     # Распознавание аудио
     try:
@@ -88,14 +93,19 @@ async def process_confirmation(
         # transcription = await audio_to_text.transcribing(
         #     file_path=audio_path, language=language
         # )
-        # if not transcription:
-        #     raise Exception("Транскрипция не выполнена.")
         # -------------------------------------------------
         with open("/CONSPECTIUS/example/text.txt", "r") as file:
             transcription = file.read()
         # -------------------------------------------------
+        if not transcription:
+            raise EmptyTextError(f"Текст после транскрибации пуст: type{type(transcription)}")
+    except FileNotFoundError as err:
+        logger.error(f"Файл не найден: {err}")
+        raise Exception(f"Файл не найден для распознования аудио: {err}") from err
+    except EmptyTextError as err:
+        logger.error(f"Транскрибация пустая: {err}")
+        raise Exception(f"Текст после транскрибации пустой: {err}") from err
     except Exception as err:
-        await state.clear()
         logger.error(f"Ошибка при расшифровке аудио: {err}")
         await send_error_message(
             bot,
@@ -103,6 +113,8 @@ async def process_confirmation(
             error="Произошла ошибка при расшифровке аудиофайла❗️",
         )
         return
+    finally:
+        await state.clear()
 
     # Если пользователь не знает желаемую длину конспекта, то происходит определение длины аудио
     # А если пользователь знает желаемую длину конспекта, то остаётся изначальная переменная lenght_conspect
@@ -113,7 +125,6 @@ async def process_confirmation(
             lenght_conspect = get_length_audio(file_path_audio=audio_path)
             logger.info(f"Длина аудио успешно определена {lenght_conspect}")
         except Exception as err:
-            await state.clear()
             logger.error(f"Ошибка при определении длины аудио: {err}")
             await send_error_message(
                 bot,
@@ -121,6 +132,8 @@ async def process_confirmation(
                 error="Произошла ошибка при определении длины аудиофайла❗️",
             )
             return
+        finally:
+            await state.clear()
 
     # Обработка расшифровки через GPT
     try:
@@ -138,10 +151,9 @@ async def process_confirmation(
         )
         logger.info("Конспект успешно обработан GPT.")
     except httpx.ProxyError as err:
-        logger.error(f"Прокси-ошибка: {err}")
-        raise Exception
+        logger.error(f"Прокси-ошибка: {err}") 
+        raise Exception(f"Ошибка связанная с прокси при обработке: {err}") from err
     except Exception as err:
-        await state.clear()
         logger.error(f"Ошибка при обработке конспекта: {err}")
         await send_error_message(
             bot,
@@ -149,16 +161,24 @@ async def process_confirmation(
             error="Произошла ошибка при обработке конспекта❗️",
         )
         return
+    finally:
+        await state.clear()
 
     # Конвертация текста в DOCX
     try:
         doc_config = DocumentConfig()
         doc_manager = DocumentManager(doc_config)
-        doc_manager.txt_to_docx(conspect, telegram_id, lenght_conspect)
+        doc_manager.txt_to_docx(
+            text=conspect,
+            lenght_conspect=lenght_conspect,
+            new_file_title=conspect.title,
+        )
         doc_file_path = doc_manager.path_docx
         logger.debug("Файл успешно конвертирован в .docx.")
+    except FileNotFoundError as err:
+        logger.error(f"Файл не найден: {err}")
+        raise Exception(f"Не найден файл при конвертации текста в .docx: {err}") from err
     except Exception as err:
-        await state.clear()
         logger.error(f"Ошибка при конвертации файла: {err}")
         await send_error_message(
             bot,
@@ -166,6 +186,29 @@ async def process_confirmation(
             error="Произошла ошибка при конвертации файла в формат .docx ❗️",
         )
         return
+    finally:
+        await state.clear()
+
+    # Переименовываем файл
+    try:
+        if not os.path.exists(doc_file_path):
+            raise FileNotFoundError(f"Исходный файл {doc_file_path} не найден для переименования")
+        new_file_path = os.path.join(os.path.dirname(doc_file_path), f"{conspect.title}.docx")
+        os.rename(doc_file_path, new_file_path)
+        doc_file_path = new_file_path
+    except FileNotFoundError as err:
+        logger.error(f"Файл не найден: {err}")
+        raise Exception(f"Не найден файл при переименовывание: {err}") from err
+    except Exception as err:
+        logger.error(f"Ошибка переименовывания файла: {err}")
+        await send_error_message(
+            bot,
+            waiting_message,
+            error="Произошла ошибка при переименовывания файла ❗️",
+        )
+        return
+    finally:
+        await state.clear()
 
     # Отправка файла пользователю
     try:
@@ -178,10 +221,9 @@ async def process_confirmation(
                 caption="☝️🤓 Ваш конспект\n\n🤖 Нравится бот? Расскажи про него другим:\nhttps://t.me/CONSPECTIUS_bot",
             ),
         )
-        await state.clear()
         logger.debug("Файл успешно отправлен пользователю.")
     except FileNotFoundError as err:
-        logger.error(f"Файл не найден для переименования: {err}")
+        raise Exception(f"Файл не найден для отравки: {err}") from err
     except Exception as err:
         await state.clear()
         logger.error(f"Ошибка при отправке файла: {err}")
@@ -191,10 +233,15 @@ async def process_confirmation(
             error="Произошла ошибка при отправке файла вам❗️",
         )
         return
+    finally:
+        await state.clear()
 
     # Удаление временного файла
     try:
         os.remove(doc_file_path)
         logger.debug("Временный файл успешно удален.")
+    except FileNotFoundError as err:
+        logger.error(f"Файл не найден: {err}")
+        raise Exception(f"Не найден файл при удалении: {err}") from err
     except Exception as err:
         logger.error(f"Ошибка при удалении временного файла: {err}")
