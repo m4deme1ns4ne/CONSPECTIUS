@@ -17,10 +17,9 @@ main_menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="Сделать конспект 📄✨")],
         [
-            KeyboardButton(text="Подписка 🌟"),
             KeyboardButton(text="Поддержать проект ❤️"),
+            KeyboardButton(text="Сообщить об ошибке ❗️"),
         ],
-        [KeyboardButton(text="Сообщить об ошибке ❗️")],
     ],
     resize_keyboard=True,
 )

@@ -95,7 +95,6 @@ async def process_confirmation(
         #                                                      чтобы не ждать долгую трансрибацию.
 
         #                                                      В будущем его не будет, так как будут написаны нормальные тесты(надеюсь).
-        # -------------------------------------------------
         # config_transcribing = AssemblyAIConfig()
         # audio_to_text = AudioToText(config=config_transcribing)
         # transcription = await audio_to_text.transcribing(
@@ -291,7 +290,9 @@ async def process_confirmation(
             f"Пользователь: {telegram_id}; Временный файл успешно удален."
         )
     except FileNotFoundError as err:
-        logger.error(f"Пользователь: {telegram_id}; Временный файл не найден: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Временный файл не найден: {err}"
+        )
         raise Exception(
             f"Пользователь: {telegram_id}; Не найден временный файл при удалении: {err}"
         ) from err
@@ -303,11 +304,11 @@ async def process_confirmation(
     # Удаление аудиофайла файла
     try:
         os.remove(audio_path)
-        logger.debug(
-            f"Пользователь: {telegram_id}; Аудиофайл успешно удален."
-        )
+        logger.debug(f"Пользователь: {telegram_id}; Аудиофайл успешно удален.")
     except FileNotFoundError as err:
-        logger.error(f"Пользователь: {telegram_id}; Аудиофайл не найден: {err}")
+        logger.error(
+            f"Пользователь: {telegram_id}; Аудиофайл не найден: {err}"
+        )
         raise Exception(
             f"Пользователь: {telegram_id}; Не найден аудиофайл при удалении: {err}"
         ) from err

@@ -3,10 +3,14 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from loguru import logger
 
-from app.databases.db import DatabaseConfig, DatabaseConnection, UserManagement
+from app.mysql.db import DatabaseConfig, DatabaseConnection, UserManagement
 
 
 router = Router()
+
+
+@router.message(Command("statistic"))
+async def add_statistic(message: Message): ...
 
 
 @router.message(Command("add"))

@@ -9,13 +9,14 @@ class DatabaseConfig:
 
     def __init__(self) -> None:
         load_dotenv()
-        self._user = os.getenv("DB_USER", "root")
-        self._db = os.getenv("DB_NAME", "conspectius")
-        self._host = os.getenv("DB_HOST", "127.0.0.1")
-        self._port = os.getenv("DB_PORT", 3306)
+        self._user = os.getenv("MYSQL_USER")
+        self._db = os.getenv("MYSQL_DATABASE")
+        self._port = os.getenv("MYSQL_PORT")
+        self._host = os.getenv("MYSQL_HOST", "localhost")
+        self._root_password = os.getenv("MYSQL_ROOT_PASSWORD", "")
 
         # Бросаем исключение, если конфигурация отсутствует
-        if not any([self._user, self._db, self._host, self._port]):
+        if not any([self._user, self._db, self._port, self._host, self._root_password]):
             raise ValueError(
                 "Отсутствие конфигурации базы данных в переменных окружения."
             )
@@ -27,15 +28,18 @@ class DatabaseConfig:
     @property
     def db(self):
         return self._db
+    
+    @property
+    def port(self):
+        return int(self._port)
 
     @property
     def host(self):
         return self._host
 
     @property
-    def port(self):
-        return self._port
-
+    def root_password(self):
+        return self._root_password
 
 class DatabaseConnection:
     """Управляет подключением к базе данных."""
@@ -52,6 +56,7 @@ class DatabaseConnection:
                 db=self.config.db,
                 host=self.config.host,
                 port=self.config.port,
+                password=self.config.root_password,
                 autocommit=True,
             )
         return self._connection
@@ -106,5 +111,5 @@ class UserManagement:
             async with conn.cursor() as cur:
                 # Здесь нужно жестко указать название столбца, который вы хотите обновить.
                 # Например, если столбец называется 'call_count', то запрос будет таким:
-                query = "UPDATE usage_conspectius SET call_count = %s WHERE telegram_id = %s"
+                query = "UPDATE usage_conspectius SET count_conspect = %s WHERE telegram_id = %s"
                 await cur.execute(query, (count, telegram_id))

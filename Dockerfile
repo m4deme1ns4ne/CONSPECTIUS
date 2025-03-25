@@ -21,5 +21,3 @@ RUN poetry config virtualenvs.create false && \
 COPY . .
 
 CMD ["poetry", "run", "python3.12", "main.py"]
-
-# docker build --no-cache . -t conspectius && docker run conspectius

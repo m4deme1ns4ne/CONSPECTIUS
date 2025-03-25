@@ -1,5 +1,5 @@
 services:
-  # Контейнер 1 (телеграмм бот)
+  # Контейнер 1 (Телеграмм бот)
   conspectius:
     build: . # Собирает из ТЕКУЩЕЙ папки (CONSPECTIUS/)
     volumes:
@@ -7,7 +7,7 @@ services:
     env_file:
       - .env
 
-  # Контейнер 2 (веб-сервер)
+  # Контейнер 2 (Веб-сервер)
   site_conspectius:
     build: ../site_conspectius # Путь ОТНОСИТЕЛЬНО папки CONSPECTIUS/
     volumes:
@@ -15,5 +15,21 @@ services:
     ports:
       - "8000:8000"
 
+  # Контейнер 3 (MySQL)
+  mysql_db:
+    image: mysql:8.0
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_PORT: ${MYSQL_PORT}
+    volumes:
+      - ./sql/init:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+
 volumes:
   shared_audio:
+  mysql_data:

@@ -1,4 +1,5 @@
 import os
+import time
 from dataclasses import asdict, dataclass
 
 from loguru import logger
@@ -27,16 +28,10 @@ class GPTConfig:
             raise ValueError(
                 "OPENAI_API_KEY не найден в файле .env или переменных окружения."
             )
-        # Прокси опционально
-        # self._proxies: str = os.getenv("PROXY", "")
 
     @property
     def gpt_api_key(self):
         return self._gpt_api_key
-
-    @property
-    def proxies(self):
-        return self._proxies
 
 
 class GPTClient:
@@ -141,7 +136,7 @@ class ConspectConstructor:
 
         # Название (только 30 процентов от текста)
         title: str = await self.gpt_response.gpt_answer(
-            get_part_text(text, percent=15), model_gpt, max_promt.title
+            get_part_text(text, percent=30), model_gpt, max_promt.title
         )
         if title is not None:
             logger.debug(
@@ -224,6 +219,8 @@ class ConspectConstructor:
 
         logger.debug("Начало обработки текста")
 
+        start_time: time = time.perf_counter()
+
         # Короткий конспект
         if lenght_conspect == "low":
             conspect = await self.short_conspect(text, model_gpt)
@@ -249,5 +246,11 @@ class ConspectConstructor:
             )
         except Exception as err:
             logger.error(f"Произошла ошибка при отображении токенов: {err}")
+
+        end_time: time = time.perf_counter()
+
+        completion_time: int = end_time - start_time
+
+        logger.debug(f"Время обработки транскрибации: {completion_time}")
 
         return conspect

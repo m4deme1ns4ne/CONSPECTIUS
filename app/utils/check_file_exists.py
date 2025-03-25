@@ -1,12 +1,14 @@
 import os
 
+from typing import Any
+
 
 class CheckAudioConfig:
     """
     Класс для конфигурации пути загрузки аудиофайлов и поддерживаемых расширений.
     """
 
-    SUPPORTED_EXTENSIONS: str = (
+    STANDART_SUPPORTED_EXTENSIONS: str = (
         ".3ga",
         ".8svx",
         ".aac",
@@ -37,12 +39,12 @@ class CheckAudioConfig:
         ".wma",
         ".wv",
     )
-    standard_audio_upload_path = "/CONSPECTIUS/shared_audio/{}"
+    STANDART_AUDIO_UPLOAD_PATH = "/CONSPECTIUS/shared_audio/{}"
 
     def __init__(
         self,
-        audio_upload_path: str = None,
-        standart_supported_extensions: str = None,
+        audio_upload_path: str = STANDART_AUDIO_UPLOAD_PATH,
+        supported_extensions: tuple | Any = STANDART_SUPPORTED_EXTENSIONS,
     ):
         """Инициализация конфигурации.
 
@@ -50,20 +52,8 @@ class CheckAudioConfig:
             audio_upload_path (str, optional): Путь к директории для загрузки файлов. Defaults to None.
             standart_supported_extensions (str, optional): Расширения, которые поддерживаются для аудиофайлов. Defaults to None.
         """
-        self._audio_upload_path = (
-            audio_upload_path or self.standard_audio_upload_path
-        )
-        self._supported_extensions = (
-            standart_supported_extensions or self.SUPPORTED_EXTENSIONS
-        )
-
-    @property
-    def audio_upload_path(self):
-        return self._audio_upload_path
-
-    @property
-    def supported_extensions(self):
-        return self._supported_extensions
+        self.audio_upload_path = audio_upload_path
+        self.supported_extensions = supported_extensions
 
 
 class AudioManager:
@@ -77,11 +67,7 @@ class AudioManager:
         Args:
             config (CheckAudioConfig): Экземпляр класса конфигурации
         """
-        self._config = config
-
-    @property
-    def config(self):
-        return self._config
+        self.config = config
 
     def check_audio_file(self, telegram_id: int) -> str | FileNotFoundError:
         """Проверяет наличие аудиофайла для пользователя по его ID
