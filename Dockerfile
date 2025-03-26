@@ -5,7 +5,12 @@ WORKDIR /CONSPECTIUS
 ENV PYTHONUNBUFFERED=1
 
 # В Dockerfile conspectius (после установки Poetry)
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get update && apt-get install -y \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
 # Установка Poetry
 RUN pip install poetry==1.8.2
