@@ -95,14 +95,14 @@ async def process_confirmation(
         #                                                      чтобы не ждать долгую трансрибацию.
 
         #                                                      В будущем его не будет, так как будут написаны нормальные тесты(надеюсь).
-        # config_transcribing = AssemblyAIConfig()
-        # audio_to_text = AudioToText(config=config_transcribing)
-        # transcription = await audio_to_text.transcribing(
-        #     file_path=audio_path, language=language
-        # )
+        config_transcribing = AssemblyAIConfig()
+        audio_to_text = AudioToText(config=config_transcribing)
+        transcription = await audio_to_text.transcribing(
+            file_path=audio_path, language=language
+        )
         # -------------------------------------------------
-        with open("/CONSPECTIUS/example/text.txt", "r") as file:
-            transcription = file.read()
+        # with open("/CONSPECTIUS/example/text.txt", "r") as file:
+        #     transcription = file.read()
         # -------------------------------------------------
         if not transcription:
             raise EmptyTextError(

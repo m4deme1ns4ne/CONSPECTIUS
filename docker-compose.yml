@@ -1,21 +1,40 @@
+networks:
+  dev:
+
 services:
-  # Контейнер 1 (Телеграмм бот)
+  # Nginx
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - site_conspectius
+    volumes:
+      - "../site_conspectius/nginx.conf:/etc/nginx/nginx.conf"
+    networks:
+      - dev
+
+  # Телеграмм бот
   conspectius:
     build: . # Собирает из ТЕКУЩЕЙ папки (CONSPECTIUS/)
     volumes:
       - shared_audio:/CONSPECTIUS/shared_audio
     env_file:
       - .env
+    networks:
+      - dev
 
-  # Контейнер 2 (Веб-сервер)
+  # Веб-сервер
   site_conspectius:
     build: ../site_conspectius # Путь ОТНОСИТЕЛЬНО папки CONSPECTIUS/
     volumes:
       - shared_audio:/SITE_CONSPECTIUS/shared_audio
     ports:
       - "8000:8000"
+    networks:
+      - dev
 
-  # Контейнер 3 (MySQL)
+  # MySQL
   mysql_db:
     image: mysql:8.0
     ports:
@@ -29,6 +48,8 @@ services:
     volumes:
       - ./sql/init:/docker-entrypoint-initdb.d
       - mysql_data:/var/lib/mysql
+    networks:
+      - dev
 
 volumes:
   shared_audio:
