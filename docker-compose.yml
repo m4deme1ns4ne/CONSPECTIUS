@@ -7,10 +7,10 @@ services:
     image: nginx:stable-alpine
     ports:
       - "80:80"
-    depends_on:
-      - site_conspectius
+      - "443:443"
     volumes:
       - "../site_conspectius/nginx.conf:/etc/nginx/nginx.conf"
+      - "/etc/letsencrypt:/etc/letsencrypt:ro"
     networks:
       - dev
 
