@@ -106,7 +106,7 @@ class ConspectConstructor:
         summary: dict = await self.gpt_response.gpt_answer(
             text, model_gpt, min_promt.summary
         )
-        if summary is not None:
+        if summary is not False:
             logger.debug(
                 f"Создано саммари для короткого конспекта: type({type(summary)})"
             )
@@ -117,7 +117,7 @@ class ConspectConstructor:
         title: str = await self.gpt_response.gpt_answer(
             summary, model_gpt, min_promt.title
         )
-        if title is not None:
+        if title is not False:
             logger.debug(
                 f"Создано название для короткого конспекта: type({type(title)})"
             )
@@ -138,7 +138,7 @@ class ConspectConstructor:
         title: str = await self.gpt_response.gpt_answer(
             get_part_text(text, percent=30), model_gpt, max_promt.title
         )
-        if title is not None:
+        if title is not False:
             logger.debug(
                 f"Создано название для подробного конспекта: type({type(title)})"
             )
@@ -149,7 +149,7 @@ class ConspectConstructor:
         key_terms_and_concepts: dict = await self.gpt_response.gpt_answer(
             text, model_gpt, max_promt.key_terms_and_concepts
         )
-        if key_terms_and_concepts is not None:
+        if key_terms_and_concepts is not False:
             logger.debug(
                 f"Созданы термины и понятия для подробного конспекта: type({type(key_terms_and_concepts)})"
             )
@@ -166,7 +166,7 @@ class ConspectConstructor:
                 max_promt.chronological_lecture_outline,
             )
         )
-        if chronological_lecture_outline is not None:
+        if chronological_lecture_outline is not False:
             logger.debug(
                 f"Создано хронологический конспект лекции для подробного конспекта: type({type(chronological_lecture_outline)})"
             )
@@ -181,7 +181,7 @@ class ConspectConstructor:
             model_gpt,
             max_promt.mini_test,
         )
-        if mini_test is not None:
+        if mini_test is not False:
             logger.debug(
                 f"Создано небольшой тест лекции для подробного конспекта: type({type(mini_test)})"
             )
