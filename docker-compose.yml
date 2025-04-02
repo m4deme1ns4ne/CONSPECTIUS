@@ -1,6 +1,3 @@
-networks:
-  dev:
-
 services:
   # Nginx
   nginx:
@@ -12,7 +9,7 @@ services:
       - "../site_conspectius/nginx.conf:/etc/nginx/nginx.conf"
       - "/etc/letsencrypt:/etc/letsencrypt:ro"
     networks:
-      - dev
+      - app_network
 
   # Телеграмм бот
   conspectius:
@@ -22,7 +19,7 @@ services:
     env_file:
       - .env
     networks:
-      - dev
+      - app_network
 
   # Веб-сервер
   site_conspectius:
@@ -32,7 +29,7 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - dev
+      - app_network
 
   # MySQL
   mysql_db:
@@ -49,7 +46,11 @@ services:
       - ./sql/init:/docker-entrypoint-initdb.d
       - mysql_data:/var/lib/mysql
     networks:
-      - dev
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
 
 volumes:
   shared_audio:
