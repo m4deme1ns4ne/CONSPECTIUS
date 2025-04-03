@@ -1,26 +1,13 @@
 services:
   # Nginx
   nginx:
-    image: bunkerity/bunkerized-nginx
+    image: nginx:stable-alpine
     ports:
       - "80:80"
       - "443:443"
-    environment:
-      - SERVER_NAME=conspectius.ru
-      - MULTISITE=no
-      - REDIRECT_HTTP_TO_HTTPS=yes
-      - AUTO_LETS_ENCRYPT=yes
-      - LETS_ENCRYPT_EMAIL=alexandervolzhanin2004@gmail.com
-      - LISTEN_HTTP=80
-      - LISTEN_HTTPS=443
-      - USE_REVERSE_PROXY=yes
-      - REVERSE_PROXY_URL=/
-      - REVERSE_PROXY_HOST=http://site_conspectius:8000
     volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./nginx:/etc/nginx
-      - ./logs:/var/log/nginx
-      - ./server-name:/opt/server-name
+      - "../site_conspectius/nginx.conf:/etc/nginx/nginx.conf"
+      - "/etc/letsencrypt:/etc/letsencrypt:ro"
     networks:
       - app_network
 
